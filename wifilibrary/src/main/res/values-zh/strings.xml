@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">WiFiLibrary</string>
+    <string name="no_write_setting_permission">不能更改系统设置</string>
+    <string name="no_write_setting_permission_message">没有更改系统设置的权限，程序可能无法创建WiFi热点，是否同意程序获取该权限？(请先关闭该权限开关，然后重新打开)</string>
+    <string name="allow">允许</string>
+    <string name="cancel">取消</string>
+    <string name="opened" >开放网络</string>
+    <string name="encryption"> 加密</string>
+    <string name="wifi_name_null">请输入WiFi的名字</string>
+    <string name="wifi_password_null">WiFi密码至少为8位</string>
+    <string name="input_wifi_password">请输入密码</string>
+    <string name="confirm">确认</string>
+    <string name="input_wifi_name_and_password">请输入WiFi名称和密码</string>
+</resources>
