@@ -9,6 +9,7 @@ android {
 
     defaultConfig {
         minSdkVersion 14
+        //noinspection OldTargetApi
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -32,8 +33,8 @@ dependencies {
 
 version = "0.0.1"
 
-def siteUrl = 'https://github.com/JackiePenghe/BaseLibrary'
-def gitUrl = 'git@github.com:JackiePenghe/BaseLibrary.git'
+def siteUrl = 'https://github.com/JackiePenghe/WifiSample'
+def gitUrl = 'git@github.com:JackiePenghe/WifiSample.git'
 
 group = "com.jackiepenghe"
 
@@ -108,7 +109,7 @@ bintray {
     configurations = ['archives']
     pkg {
         repo = "maven"
-        name = "baselibrary"
+        name = "wifilibrary"
         userOrg = 'jackiepenghe'
         websiteUrl = siteUrl
         vcsUrl = gitUrl
