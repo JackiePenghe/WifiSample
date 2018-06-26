@@ -11,10 +11,8 @@ android {
         minSdkVersion 14
         //noinspection OldTargetApi
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionCode 2
+        versionName "0.0.2"
 
     }
 
@@ -31,7 +29,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
 }
 
-version = "0.0.1"
+version = "0.0.2"
 
 def siteUrl = 'https://github.com/JackiePenghe/WifiSample'
 def gitUrl = 'git@github.com:JackiePenghe/WifiSample.git'

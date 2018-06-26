@@ -62,7 +62,7 @@ public class WelcomeActivity extends BaseWelcomeActivity {
     /**
      * 权限请求被拒绝后执行的操作
      */
-    private Action deniedAction = new Action() {
+    private Action<List<String>> deniedAction = new Action<List<String>>() {
         @Override
         public void onAction(List<String> permissions) {
             Tool.toastL(WelcomeActivity.this, R.string.permission_denied);
@@ -73,7 +73,7 @@ public class WelcomeActivity extends BaseWelcomeActivity {
     /**
      * 权限请求通过后进行的操作
      */
-    private Action grantedAction = new Action() {
+    private Action<List<String>> grantedAction = new Action<List<String>>() {
         @Override
         public void onAction(List<String> permissions) {
             toNext();
@@ -83,7 +83,7 @@ public class WelcomeActivity extends BaseWelcomeActivity {
     /**
      * 用户第一次拒绝了权限，再次请求此权限时，提醒用户为什么需要该权限，以免用户反感
      */
-    private Rationale rationale = new Rationale() {
+    private Rationale<List<String>> rationale = new Rationale<List<String>>() {
         @Override
         public void showRationale(Context context, List<String> permissions, final RequestExecutor executor) {
             new AlertDialog.Builder(WelcomeActivity.this)
@@ -146,6 +146,7 @@ public class WelcomeActivity extends BaseWelcomeActivity {
     private void doNormal() {
         //权限请求
         AndPermission.with(WelcomeActivity.this)
+                .runtime()
                 .permission(Permission.Group.LOCATION, Permission.Group.STORAGE)
                 .onDenied(deniedAction)
                 .onGranted(grantedAction)

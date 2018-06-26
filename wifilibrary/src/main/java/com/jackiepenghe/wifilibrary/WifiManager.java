@@ -254,6 +254,15 @@ public class WifiManager {
         return context;
     }
 
+    /**
+     * 设置WiFi
+     * @param wifiStateChangedListener WiFi状态改变时调用此接口
+     */
+    public static void setWifiStateChangedListener(com.jackiepenghe.wifilibrary.WifiManager.WifiStateChangedListener wifiStateChangedListener) {
+        checkInitStatus();
+        WifiManager.wifiStatusBroadcastReceiver.setWifiStateChangedListener(wifiStateChangedListener);
+    }
+
     /*---------------------------接口定义---------------------------*/
 
     /**
