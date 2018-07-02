@@ -1,7 +1,10 @@
 package com.jackiepenghe.wifilibrary;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.wifi.ScanResult;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 /**
  * WiFi设备bean类
@@ -52,9 +55,63 @@ public class WifiDevice {
         return scanResult.SSID;
     }
 
+    @SuppressWarnings("unused")
     public String getBSSID() {
         return scanResult.BSSID;
     }
+
+    @SuppressWarnings("unused")
+    public String getCapabilities(){
+        return scanResult.capabilities;
+    }
+
+    @SuppressWarnings("unused")
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @TargetApi(Build.VERSION_CODES.M)
+    public int getCenterFreq0(){
+        return scanResult.centerFreq0;
+    }
+
+    @SuppressWarnings("unused")
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @TargetApi(Build.VERSION_CODES.M)
+    public int getCenterFreq1(){
+        return scanResult.centerFreq1;
+    }
+
+    @SuppressWarnings("unused")
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @TargetApi(Build.VERSION_CODES.M)
+    public int getChannelWidth(){
+        return scanResult.channelWidth;
+    }
+
+    @SuppressWarnings("unused")
+    public int getFrequency(){
+        return scanResult.frequency;
+    }
+
+    @SuppressWarnings("unused")
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @TargetApi(Build.VERSION_CODES.M)
+    public CharSequence getOperatorFriendlyName(){
+        return scanResult.operatorFriendlyName;
+    }
+
+    @SuppressWarnings("unused")
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+    @TargetApi(Build.VERSION_CODES.M)
+    public long getTimestamp(){
+        return scanResult.timestamp;
+    }
+
+    @SuppressWarnings("unused")
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    @TargetApi(Build.VERSION_CODES.M)
+    public CharSequence getVenueName(){
+        return scanResult.venueName;
+    }
+
 
     public int getIntLevel() {
         return scanResult.level;
