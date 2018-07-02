@@ -10,6 +10,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
     /**
      * 获取到WiFi扫描的结果时的回调
      */
-    private WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedLinstener;
+    private WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedListener;
 
     public WifiScanDataAndStatusBroadcastReceiver(WifiManager systemWifiManager) {
         this.systemWifiManager = systemWifiManager;
@@ -76,16 +77,50 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        if(action == null){
+        if (action == null) {
             return;
         }
 
         switch (action) {
             // wifi已成功扫描到可用wifi。
             case android.net.wifi.WifiManager.SCAN_RESULTS_AVAILABLE_ACTION:
+
                 List<ScanResult> scanResults = systemWifiManager.getScanResults();
-                if (wifiScanResultObtainedLinstener != null) {
-                    wifiScanResultObtainedLinstener.wifiScanResultObtained(scanResults);
+                int size = scanResults.size();
+
+                // 每次最大元素就像气泡一样"浮"到数组的最后
+                for (int j = 0; j < size - 1; j++) {
+                    // 依次比较相邻的两个元素,使较小的那个向后移
+                    for (int i = 0; i < size - 1 - j; i++) {
+                        ScanResult curScanResult = scanResults.get(i);
+                        ScanResult nextScanResult = scanResults.get(i + 1);
+                        if (curScanResult.level < nextScanResult.level) {
+                            scanResults.set(i, nextScanResult);
+                            scanResults.set(i + 1, curScanResult);
+                        }
+                    }
+                }
+
+                for (int i = 0; i < size; i++) {
+                    ScanResult scanResult = scanResults.get(i);
+                    String ssid = scanResult.SSID;
+                    if (ssid == null || "".equals(ssid)) {
+                        scanResult.SSID = context.getString(R.string.hidden_network);
+                        scanResults.remove(i);
+                        scanResults.add(scanResult);
+                    }
+                    int level = scanResult.level;
+                    Tool.warnOut(TAG, "设备 " + (i + 1) + " :ssid = " + ssid + ",level = " + level);
+                }
+
+                ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
+                for (int i = 0; i < size; i++) {
+                    WifiDevice wifiDevice = new WifiDevice(context, scanResults.get(i));
+                    wifiDevices.add(wifiDevice);
+                }
+
+                if (wifiScanResultObtainedListener != null) {
+                    wifiScanResultObtainedListener.wifiScanResultObtained(wifiDevices);
                 }
                 break;
             default:
@@ -99,9 +134,9 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
     /**
      * 设置获取到WiFi扫描的结果时的回调
      *
-     * @param wifiScanResultObtainedLinstener 获取到WiFi扫描的结果时的回调
+     * @param wifiScanResultObtainedListener 获取到WiFi扫描的结果时的回调
      */
-    public void setWifiScanResultObtainedLinstener(WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedLinstener) {
-        this.wifiScanResultObtainedLinstener = wifiScanResultObtainedLinstener;
+    public void setWifiScanResultObtainedListener(WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedListener) {
+        this.wifiScanResultObtainedListener = wifiScanResultObtainedListener;
     }
 }

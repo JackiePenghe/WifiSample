@@ -12,4 +12,10 @@
     <string name="confirm">Confirm</string>
     <string name="input_wifi_name_and_password">Please enter WiFi SSID and password</string>
     <string name="input_wifi_ssid">Please input wifi SSID</string>
+    <string name="level_1">Stronger</string>
+    <string name="level_2">Strong</string>
+    <string name="level_3">General</string>
+    <string name="level_4">Weak</string>
+    <string name="level_5">Weaker</string>
+    <string name="hidden_network">Hidden</string>
 </resources>

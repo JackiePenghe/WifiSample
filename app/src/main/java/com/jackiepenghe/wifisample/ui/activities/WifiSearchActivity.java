@@ -16,6 +16,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.jackiepenghe.baselibrary.BaseAppCompatActivity;
 import com.jackiepenghe.baselibrary.DefaultItemDecoration;
 import com.jackiepenghe.baselibrary.Tool;
+import com.jackiepenghe.wifilibrary.WifiDevice;
 import com.jackiepenghe.wifilibrary.WifiManager;
 import com.jackiepenghe.wifilibrary.WifiOperatingTools;
 import com.jackiepenghe.wifisample.R;
@@ -63,7 +64,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     /**
      * 适配器的数据源
      */
-    private List<ScanResult> adapterList = new ArrayList<>();
+    private List<WifiDevice> adapterList = new ArrayList<>();
 
     /**
      * 适配器
@@ -182,35 +183,42 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
         @Override
         public void unknownStatus() {
             Tool.warnOut(TAG, "未知连接状态");
+            textView.setText("未知连接状态");
+        }
+
+        /**
+         * 用户取消了连接动作
+         */
+        @Override
+        public void cancelConnect() {
+            Tool.warnOut(TAG, "用户取消了本次连接");
+            textView.setText("用户取消了本次连接");
         }
     };
 
     /**
      * 获取到WiFi的扫描结果后进行的回调
      */
-    private WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedLinstener = new WifiOperatingTools.WifiScanResultObtainedListener() {
+    private WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedListener = new WifiOperatingTools.WifiScanResultObtainedListener() {
         @Override
-        public void wifiScanResultObtained(List<ScanResult> scanResults) {
+        public void wifiScanResultObtained(ArrayList<WifiDevice> wifiDevices) {
             Tool.warnOut(TAG, "扫描结果已获取");
-            int size = scanResults.size();
+            Tool.toastL(WifiSearchActivity.this,R.string.search_finished);
+            int size = wifiDevices.size();
             if (size == 0) {
                 Tool.toastL(WifiSearchActivity.this, "没有搜索到任何WiFi");
                 return;
             }
 
             for (int i = 0; i < size; i++) {
-                ScanResult scanResult = scanResults.get(i);
-                String ssid = scanResult.SSID;
-                if (ssid == null || "".equals(ssid)) {
-                    scanResults.remove(i);
-                    scanResults.add(scanResult);
-                }
-                int level = scanResult.level;
+                WifiDevice wifiDevice = wifiDevices.get(i);
+                String ssid =  wifiDevice.getSSID();
+                int level = wifiDevice.getIntLevel();
                 Tool.warnOut(TAG, "设备 " + (i + 1) + " :ssid = " + ssid + ",level = " + level);
             }
 
             adapterList.clear();
-            adapterList.addAll(scanResults);
+            adapterList.addAll(wifiDevices);
             wifiScanResultAdapter.notifyDataSetChanged();
         }
     };
@@ -236,7 +244,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     private BaseQuickAdapter.OnItemClickListener onItemClickListener = new BaseQuickAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-            startConnect(adapterList.get(position));
+            startConnect(adapterList.get(position).getScanResult());
         }
     };
 
@@ -363,7 +371,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     private void initWifiScanner() {
         wifiOperatingTools = WifiManager.getWifiOperatingToolsInstance();
         wifiOperatingTools.init(wifiScanCallback, wifiConnectCallback);
-        wifiOperatingTools.setWifiScanResultObtainedListener(wifiScanResultObtainedLinstener);
+        wifiOperatingTools.setWifiScanResultObtainedListener(wifiScanResultObtainedListener);
     }
 
     /**

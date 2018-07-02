@@ -9,12 +9,14 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiInfo;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,6 +33,10 @@ public class WifiOperatingTools {
      * WiFi密码的最小长度
      */
     private static final int WIFI_PASSWORD_MIN_LENGTH = 8;
+    /**
+     * Handler
+     */
+    private static final Handler HANDLER = new Handler();
 
     /*---------------------------成员变量---------------------------*/
 
@@ -58,6 +64,10 @@ public class WifiOperatingTools {
      * WiFi扫描相关的广播接收者
      */
     private WifiScanDataAndStatusBroadcastReceiver wifiScanDataAndStatusBroadcastReceiver;
+    /**
+     * WiFi连接相关的回调
+     */
+    private WifiConnectCallback wifiConnectCallback;
 
     /*---------------------------构造方法---------------------------*/
 
@@ -70,7 +80,7 @@ public class WifiOperatingTools {
         wifiScanDataAndStatusBroadcastReceiver = new WifiScanDataAndStatusBroadcastReceiver(systemWifiManager);
         context = WifiManager.getContext();
         context.registerReceiver(wifiConnectStatusBroadcastReceiver, makeWifiConnectStatusBroadcastReceiverIntentFilter());
-        context.registerReceiver(wifiScanDataAndStatusBroadcastReceiver,makeWifiScanDataAndStatusBroadcastReceiverIntentFilter());
+        context.registerReceiver(wifiScanDataAndStatusBroadcastReceiver, makeWifiScanDataAndStatusBroadcastReceiverIntentFilter());
     }
 
     /*---------------------------公开方法---------------------------*/
@@ -141,7 +151,19 @@ public class WifiOperatingTools {
                         connect(config[0]);
                     }
                 })
-                .setNegativeButton(R.string.cancel, null)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (wifiConnectCallback != null) {
+                            HANDLER.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    wifiConnectCallback.cancelConnect();
+                                }
+                            });
+                        }
+                    }
+                })
                 .setCancelable(false);
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
@@ -155,6 +177,7 @@ public class WifiOperatingTools {
     public void init(@NonNull WifiScanCallback wifiScanCallback, @NonNull WifiConnectCallback wifiConnectCallback) {
         this.wifiScanCallback = wifiScanCallback;
         wifiConnectStatusBroadcastReceiver.setWifiConnectCallback(wifiConnectCallback);
+        this.wifiConnectCallback = wifiConnectCallback;
         isInit = true;
     }
 
@@ -182,7 +205,7 @@ public class WifiOperatingTools {
             wifiConnectStatusBroadcastReceiver.setWifiConnectCallback(null);
         }
         if (wifiScanDataAndStatusBroadcastReceiver != null) {
-            wifiScanDataAndStatusBroadcastReceiver.setWifiScanResultObtainedLinstener(null);
+            wifiScanDataAndStatusBroadcastReceiver.setWifiScanResultObtainedListener(null);
         }
 
         try {
@@ -204,77 +227,12 @@ public class WifiOperatingTools {
      *
      * @param wifiScanResultObtainedListener 获取到WiFi扫描的结果时的回调
      */
-    public void setWifiScanResultObtainedListener(WifiScanResultObtainedListener wifiScanResultObtainedListener) {
-        checkInitStatus();
-        wifiScanDataAndStatusBroadcastReceiver.setWifiScanResultObtainedLinstener(wifiScanResultObtainedListener);
+        public void setWifiScanResultObtainedListener(WifiScanResultObtainedListener wifiScanResultObtainedListener) {
+            checkInitStatus();
+        wifiScanDataAndStatusBroadcastReceiver.setWifiScanResultObtainedListener(wifiScanResultObtainedListener);
     }
 
     /*---------------------------公开静态方法---------------------------*/
-
-    /**
-     * 获取WiFi的加密方式
-     *
-     * @param scanResult 扫描结果
-     * @return WiFi的加密方式
-     */
-    public static String getEncryptionWayString(@NonNull Context context, @NonNull ScanResult scanResult) {
-        String wpaUpper = "WPA";
-        String wpa = "wpa";
-        String wpa2Upper = "WPA2";
-        String wpa2 = "wpa2";
-        String wepUpper = "WEP";
-        String wep = "wep";
-
-        String capabilities = scanResult.capabilities;
-        boolean supportWPA = false;
-        boolean supportWPA2 = false;
-        boolean supportWEP = false;
-        capabilities = capabilities.replace("[", " ");
-        capabilities = capabilities.replace("]", " ");
-        capabilities = capabilities.replace("  ", "\n");
-
-        if (capabilities.contains(wepUpper) || capabilities.contains(wep)) {
-            supportWEP = true;
-        }
-
-        if (capabilities.contains(wpa2Upper) || capabilities.contains(wpa2)) {
-            supportWPA2 = true;
-        }
-
-        if (capabilities.contains(wpaUpper) || capabilities.contains(wpa)) {
-            supportWPA = true;
-        }
-
-        StringBuilder passType = new StringBuilder();
-        if (supportWEP) {
-            passType.append("WEP");
-        }
-
-        if (supportWPA) {
-            if ("".equals(passType.toString())) {
-                passType.append("WPA");
-            } else {
-                passType.append("/WPA");
-            }
-        }
-
-        if (supportWPA2) {
-            if ("".equals(passType.toString())) {
-                passType.append("WPA2");
-            } else {
-                passType.append("/WPA2");
-            }
-        }
-
-        if ("".equals(passType.toString())) {
-            passType.append(context.getString(R.string.opened));
-        } else {
-            passType.append(context.getString(R.string.encryption));
-        }
-
-        return passType.toString();
-    }
-
     /**
      * 获取加密方式
      *
@@ -349,12 +307,11 @@ public class WifiOperatingTools {
         } else {
             return EncryptWay.UNKNOWN__ENCRYPT;
         }
-
     }
 
+    @SuppressWarnings("unused")
     public void sendData(byte[] data) {
         String wifiIp = getWifiIp();
-
     }
 
     /**
@@ -362,7 +319,8 @@ public class WifiOperatingTools {
      *
      * @return WiFi的IP地址
      */
-    private String getWifiIp() {
+    @SuppressWarnings("WeakerAccess")
+    public String getWifiIp() {
         checkInitStatus();
         //检查Wifi状态
         if (!systemWifiManager.isWifiEnabled()) {
@@ -372,8 +330,7 @@ public class WifiOperatingTools {
         //获取32位整型IP地址
         int ipAdd = wi.getIpAddress();
         //把整型地址转换成“*.*.*.*”地址
-        String ip = intToIp(ipAdd);
-        return ip;
+        return intToIp(ipAdd);
     }
 
     /*---------------------------枚举定义---------------------------*/
@@ -511,7 +468,7 @@ public class WifiOperatingTools {
          *
          * @param scanResults WiFi扫描的结果
          */
-        void wifiScanResultObtained(List<ScanResult> scanResults);
+        void wifiScanResultObtained(ArrayList<WifiDevice> scanResults);
     }
 
     /**
@@ -567,6 +524,11 @@ public class WifiOperatingTools {
          * 未知状态
          */
         void unknownStatus();
+
+        /**
+         * 用户取消了连接动作
+         */
+        void cancelConnect();
     }
 
     /*---------------------------私有方法---------------------------*/
@@ -668,7 +630,19 @@ public class WifiOperatingTools {
                         connect(config[0]);
                     }
                 })
-                .setNegativeButton(R.string.cancel, null)
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (wifiConnectCallback != null) {
+                            HANDLER.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    wifiConnectCallback.cancelConnect();
+                                }
+                            });
+                        }
+                    }
+                })
                 .setCancelable(false)
                 .show();
     }

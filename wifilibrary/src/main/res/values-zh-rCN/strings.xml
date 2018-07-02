@@ -12,4 +12,10 @@
     <string name="confirm">确认</string>
     <string name="input_wifi_name_and_password">请输入WiFi名称和密码</string>
     <string name="input_wifi_ssid">请输入WiFi的SSID</string>
+    <string name="level_1">很强</string>
+    <string name="level_2">强</string>
+    <string name="level_3">一般</string>
+    <string name="level_4">弱</string>
+    <string name="level_5">很弱</string>
+    <string name="hidden_network">隐藏网络</string>
 </resources>
