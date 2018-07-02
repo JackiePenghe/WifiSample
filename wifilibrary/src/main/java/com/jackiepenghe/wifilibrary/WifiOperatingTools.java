@@ -466,9 +466,9 @@ public class WifiOperatingTools {
         /**
          * 获取到WiFi扫描的结果
          *
-         * @param scanResults WiFi扫描的结果
+         * @param wifiDevices WiFi扫描的结果
          */
-        void wifiScanResultObtained(ArrayList<WifiDevice> scanResults);
+        void wifiScanResultObtained(ArrayList<WifiDevice> wifiDevices);
     }
 
     /**
