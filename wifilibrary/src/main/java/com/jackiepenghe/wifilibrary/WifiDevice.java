@@ -52,6 +52,10 @@ public class WifiDevice {
         return scanResult.SSID;
     }
 
+    public String getBSSID() {
+        return scanResult.BSSID;
+    }
+
     public int getIntLevel() {
         return scanResult.level;
     }
