@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiInfo;
@@ -15,6 +14,8 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+
+import com.jackiepenghe.wifilibrary.WifiDevice.EncryptWay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,30 +90,31 @@ public class WifiOperatingTools {
      * 开始连接
      *
      * @param activity   Activity
-     * @param scanResult 扫描设备
+     * @param wifiDevice 扫描设备
      */
-    public void startConnect(Activity activity, final ScanResult scanResult) {
+    public void startConnect(Activity activity, WifiDevice wifiDevice) {
         checkInitStatus();
-        final EncryptWay encryptionWay = getEncryptionWay(scanResult);
-        final WifiConfiguration[] config = {isExists(scanResult.SSID, encryptionWay)};
-        if (config[0] == null) {
-            //需要密码
-            if (encryptionWay != EncryptWay.NO_ENCRYPT) {
-                //搜到的WiFi的SSID有内容（可见WiFi）
-                if (scanResult.SSID != null && !"".equals(scanResult.SSID)) {
-                    showConnectWifiWithPassWord(activity, scanResult, encryptionWay, config);
-                }
-                //搜到的WiFi的SSID无内容（隐藏的WiFi）
-                else {
-                    Tool.warnOut(TAG, "连接隐藏WiFi");
-                    showConnectWifiWithNameAndPassWord(activity, encryptionWay, config);
-                }
-            } else {
-                config[0] = createWifiInfo(scanResult.SSID, "", encryptionWay);
-                connect(config[0]);
+        int netId = isExists(wifiDevice.getSSID());
+        if (-1 != netId) {
+            systemWifiManager.enableNetwork(netId, true);
+            return;
+        }
+
+        EncryptWay encryptWay = wifiDevice.getEncryptWay();
+        //需要密码
+        if (encryptWay != EncryptWay.NO_ENCRYPT) {
+            //搜到的WiFi的SSID有内容（可见WiFi）
+            if (wifiDevice.getSSID() != null && !"".equals(wifiDevice.getSSID())) {
+                showConnectWifiWithPassWord(activity, wifiDevice);
+            }
+            //搜到的WiFi的SSID无内容（隐藏的WiFi）
+            else {
+                Tool.warnOut(TAG, "连接隐藏WiFi");
+                showConnectWifiWithNameAndPassWord(activity, encryptWay);
             }
         } else {
-            connect(config[0]);
+            WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), "", encryptWay);
+            connect(wifiConfiguration);
         }
     }
 
@@ -121,10 +123,9 @@ public class WifiOperatingTools {
      *
      * @param activity      Activity
      * @param encryptionWay 加密方式
-     * @param config        WifiConfiguration[](final类型)
      */
-    private void showConnectWifiWithNameAndPassWord(Activity activity, final EncryptWay encryptionWay, final WifiConfiguration[] config) {
-        final View view = View.inflate(context, R.layout.hidden_wifi_dialog, null);
+    private void showConnectWifiWithNameAndPassWord(Activity activity, final EncryptWay encryptionWay) {
+        final View view = View.inflate(context, R.layout.com_jackiepenghe_hidden_wifi_dialog, null);
         AlertDialog.Builder builder = new AlertDialog.Builder(activity)
                 .setTitle(R.string.input_wifi_name_and_password)
                 .setIcon(android.R.drawable.ic_dialog_info)
@@ -147,8 +148,8 @@ public class WifiOperatingTools {
                             Tool.toastL(context, R.string.wifi_password_null);
                             return;
                         }
-                        config[0] = createWifiInfo(wifiName, wifiPassword, encryptionWay);
-                        connect(config[0]);
+                        WifiConfiguration wifiConfiguration = createWifiInfo(wifiName, wifiPassword, encryptionWay);
+                        connect(wifiConfiguration);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -158,7 +159,7 @@ public class WifiOperatingTools {
                             HANDLER.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    wifiConnectCallback.cancelConnect();
+                                    wifiConnectCallback.cancelConnect(context.getString(R.string.hidden_network));
                                 }
                             });
                         }
@@ -227,87 +228,12 @@ public class WifiOperatingTools {
      *
      * @param wifiScanResultObtainedListener 获取到WiFi扫描的结果时的回调
      */
-        public void setWifiScanResultObtainedListener(WifiScanResultObtainedListener wifiScanResultObtainedListener) {
-            checkInitStatus();
+    public void setWifiScanResultObtainedListener(WifiScanResultObtainedListener wifiScanResultObtainedListener) {
+        checkInitStatus();
         wifiScanDataAndStatusBroadcastReceiver.setWifiScanResultObtainedListener(wifiScanResultObtainedListener);
     }
 
-    /*---------------------------公开静态方法---------------------------*/
-    /**
-     * 获取加密方式
-     *
-     * @param scanResult 扫描结果
-     * @return 加密方式的枚举
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static EncryptWay getEncryptionWay(ScanResult scanResult) {
-        String wpaUpper = "WPA";
-        String wpa = "wpa";
-        String wpa2Upper = "WPA2";
-        String wpa2 = "wpa2";
-        String wepUpper = "WEP";
-        String wep = "wep";
-
-        String capabilities = scanResult.capabilities;
-        boolean supportWPA = false;
-        boolean supportWPA2 = false;
-        boolean supportWEP = false;
-        capabilities = capabilities.replace("[", " ");
-        capabilities = capabilities.replace("]", " ");
-        capabilities = capabilities.replace("  ", "\n");
-
-        if (capabilities.contains(wepUpper) || capabilities.contains(wep)) {
-            supportWEP = true;
-        }
-
-        if (capabilities.contains(wpa2Upper) || capabilities.contains(wpa2)) {
-            supportWPA2 = true;
-        }
-
-        if (capabilities.contains(wpaUpper) || capabilities.contains(wpa)) {
-            supportWPA = true;
-        }
-
-        StringBuilder passType = new StringBuilder();
-        if (supportWEP) {
-            passType.append("WEP");
-        }
-
-        if (supportWPA) {
-            if ("".equals(passType.toString())) {
-                passType.append("WPA");
-            } else {
-                passType.append("/WPA");
-            }
-        }
-
-        if (supportWPA2) {
-            if ("".equals(passType.toString())) {
-                passType.append("WPA2");
-            } else {
-                passType.append("/WPA2");
-            }
-        }
-
-        //未加密
-        if ("".equals(passType.toString())) {
-            return EncryptWay.NO_ENCRYPT;
-        }
-        //WEP加密
-        else if (passType.toString().contains(wepUpper)) {
-            return EncryptWay.WEP_ENCRYPT;
-        }
-        //WPA/WPA2加密
-        else if (passType.toString().contains(wpaUpper) && passType.toString().contains(wpa2Upper)) {
-            return EncryptWay.WPA_WPA2_ENCRYPT;
-        }
-        //仅WPA加密
-        else if (passType.toString().contains(wpaUpper)) {
-            return EncryptWay.WPA_ENCRYPT;
-        } else {
-            return EncryptWay.UNKNOWN__ENCRYPT;
-        }
-    }
+    /*---------------------------公开方法---------------------------*/
 
     @SuppressWarnings("unused")
     public void sendData(byte[] data) {
@@ -331,115 +257,6 @@ public class WifiOperatingTools {
         int ipAdd = wi.getIpAddress();
         //把整型地址转换成“*.*.*.*”地址
         return intToIp(ipAdd);
-    }
-
-    /*---------------------------枚举定义---------------------------*/
-
-    /**
-     * 加密方式的枚举
-     */
-    public enum EncryptWay {
-        /**
-         * 未加密
-         */
-        NO_ENCRYPT(1),
-        /**
-         * WPA/WPA2加密
-         */
-        WPA_WPA2_ENCRYPT(2),
-        /**
-         * WEP加密
-         */
-        WEP_ENCRYPT(3),
-        /**
-         * 仅WPA加密
-         */
-        WPA_ENCRYPT(4),
-        /**
-         * PSK加密
-         */
-        EAP_ENCRYPT(5),
-        /**
-         * 仅WPA2加密
-         */
-        WPA2_ENCRYPT(6),
-        /**
-         * 未知加密方式
-         */
-        UNKNOWN__ENCRYPT(7);
-
-        int encryptWay;
-
-        EncryptWay(int encryptWay) {
-            this.encryptWay = encryptWay;
-        }
-
-        /**
-         * 获取当前的枚举的值
-         *
-         * @return 当前的枚举的值
-         */
-        @SuppressWarnings("unused")
-        public int getEncryptWayValue() {
-            return encryptWay;
-        }
-
-        /**
-         * 通过枚举的值来获取枚举对象
-         *
-         * @param encryptWayValue 枚举的值
-         * @return 枚举对象
-         */
-        @SuppressWarnings("unused")
-        public static EncryptWay getEncryptWayByValue(int encryptWayValue) {
-            switch (encryptWayValue) {
-                case 1:
-                    return EncryptWay.NO_ENCRYPT;
-                case 2:
-                    return EncryptWay.WPA_WPA2_ENCRYPT;
-                case 3:
-                    return EncryptWay.WEP_ENCRYPT;
-                default:
-                    return EncryptWay.UNKNOWN__ENCRYPT;
-            }
-        }
-    }
-
-    /**
-     * 获取WiFi的加密方式
-     *
-     * @param config WiFi的配置
-     * @return WiFi加密方式
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static EncryptWay geEncryptWay(WifiConfiguration config) {
-        if (config == null) {
-            return null;
-        }
-        if (config.allowedKeyManagement.get(KeyMgmt.NONE)) {
-            return EncryptWay.NO_ENCRYPT;
-        }
-
-        //KeyMgmt.WPA2_PSK
-        int wpa2Psk = 4;
-        if (config.allowedKeyManagement.get(KeyMgmt.WPA_PSK) && config.allowedKeyManagement.get(wpa2Psk)) {
-            return EncryptWay.WPA_WPA2_ENCRYPT;
-        }
-        if (config.allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
-            return EncryptWay.WPA_ENCRYPT;
-        }
-        if (config.allowedKeyManagement.get(wpa2Psk)) {
-            return EncryptWay.WPA2_ENCRYPT;
-        }
-        if (config.allowedKeyManagement.get(KeyMgmt.WPA_EAP) && config.allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
-            return EncryptWay.EAP_ENCRYPT;
-        }
-
-        if (config.wepKeys[0] != null) {
-            return EncryptWay.WEP_ENCRYPT;
-        } else {
-            return EncryptWay.NO_ENCRYPT;
-        }
     }
 
     /*---------------------------接口定义---------------------------*/
@@ -527,8 +344,10 @@ public class WifiOperatingTools {
 
         /**
          * 用户取消了连接动作
+         *
+         * @param ssid 准备连接的WiFi SSID
          */
-        void cancelConnect();
+        void cancelConnect(String ssid);
     }
 
     /*---------------------------私有方法---------------------------*/
@@ -550,17 +369,15 @@ public class WifiOperatingTools {
      * @param ssid 当前WiFi的SSID
      * @return 当前wifi已保存的配置
      */
-    private WifiConfiguration isExists(String ssid, EncryptWay encryptWay) {
+    private int isExists(String ssid) {
         List<WifiConfiguration> existingConfigs = systemWifiManager.getConfiguredNetworks();
+
         for (WifiConfiguration existingConfig : existingConfigs) {
-            String s = "\"" + ssid + "\"";
-            if (existingConfig.SSID.equals(s)) {
-                if (geEncryptWay(existingConfig) == encryptWay) {
-                    return existingConfig;
-                }
+            if (existingConfig.SSID.equals("\"" + ssid + "\"")) {
+                return existingConfig.networkId;
             }
         }
-        return null;
+        return -1;
     }
 
     private WifiConfiguration createWifiInfo(String ssid, String password, EncryptWay encryptWay) {
@@ -605,13 +422,11 @@ public class WifiOperatingTools {
     /**
      * 连接指定的WiFi网络
      *
-     * @param activity      Activity
-     * @param scanResult    扫描结果
-     * @param encryptionWay WiFi加密方式
-     * @param config        WiFi配置
+     * @param activity   Activity
+     * @param wifiDevice 扫描结果
      */
-    private void showConnectWifiWithPassWord(final Activity activity, final ScanResult scanResult, final EncryptWay encryptionWay, final WifiConfiguration[] config) {
-        final EditText editText = new EditText(context);
+    private void showConnectWifiWithPassWord(final Activity activity, final WifiDevice wifiDevice) {
+        final EditText editText = (EditText) View.inflate(activity, R.layout.com_jackiepenghe_edit_text, null);
         new AlertDialog.Builder(activity)
                 .setTitle(R.string.input_wifi_password)
                 .setIcon(android.R.drawable.ic_dialog_info)
@@ -623,11 +438,11 @@ public class WifiOperatingTools {
                         Log.w(TAG, "editText.getText():" + password);
                         if ("".equals(password) || password.length() < WIFI_PASSWORD_MIN_LENGTH) {
                             Tool.toastL(context, R.string.wifi_password_null);
-                            showConnectWifiWithPassWord(activity, scanResult, encryptionWay, config);
+                            showConnectWifiWithPassWord(activity, wifiDevice);
                             return;
                         }
-                        config[0] = createWifiInfo(scanResult.SSID, password, encryptionWay);
-                        connect(config[0]);
+                        WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), password, wifiDevice.getEncryptWay());
+                        connect(wifiConfiguration);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -637,7 +452,7 @@ public class WifiOperatingTools {
                             HANDLER.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    wifiConnectCallback.cancelConnect();
+                                    wifiConnectCallback.cancelConnect(wifiDevice.getSSID());
                                 }
                             });
                         }

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author jackie
  */
-public class WifiScanResultAdapter extends BaseQuickAdapter<WifiDevice, BaseViewHolder> {
+public class WifiDeviceAdapter extends BaseQuickAdapter<WifiDevice, BaseViewHolder> {
 
     /**
      * Same as QuickAdapter#QuickAdapter(Context,int) but with
@@ -20,7 +20,7 @@ public class WifiScanResultAdapter extends BaseQuickAdapter<WifiDevice, BaseView
      *
      * @param data A new list is created out of this one to avoid mutable list
      */
-    public WifiScanResultAdapter(@Nullable List<WifiDevice> data) {
+    public WifiDeviceAdapter(@Nullable List<WifiDevice> data) {
         super(R.layout.adapter_wifi_scan_result, data);
     }
 
@@ -34,7 +34,7 @@ public class WifiScanResultAdapter extends BaseQuickAdapter<WifiDevice, BaseView
     protected void convert(BaseViewHolder helper, WifiDevice item) {
 
         String encryptionWay = item.getEncryptionWayString();
-        helper.setImageResource(R.id.signal,item.getLevelDrawableResId())
+        helper.setImageResource(R.id.signal, item.getLevelDrawableResId())
                 .setText(R.id.text1, item.getSSID())
                 .setText(R.id.text2, encryptionWay)
                 .setText(R.id.level, item.getStringLevel() + "(" + item.getIntLevel() + ")");

@@ -206,7 +206,9 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        wifiHotspotController.close();
+        if (wifiHotspotController.isWifiApEnabled()) {
+            wifiHotspotController.close();
+        }
         WifiManager.releaseWifiHotspotCreator();
     }
 

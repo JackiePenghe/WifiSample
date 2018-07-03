@@ -20,4 +20,9 @@
     <string name="send_data">发送数据</string>
     <string name="_null" />
     <string name="search_finished">扫描结束</string>
+    <string name="level_1">很强</string>
+    <string name="level_2">强</string>
+    <string name="level_3">一般</string>
+    <string name="level_4">弱</string>
+    <string name="level_5">很弱</string>
 </resources>

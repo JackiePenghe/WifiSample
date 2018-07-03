@@ -1,7 +1,6 @@
 package com.jackiepenghe.wifisample.ui.activities;
 
 import android.graphics.Color;
-import android.net.wifi.ScanResult;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,7 +19,7 @@ import com.jackiepenghe.wifilibrary.WifiDevice;
 import com.jackiepenghe.wifilibrary.WifiManager;
 import com.jackiepenghe.wifilibrary.WifiOperatingTools;
 import com.jackiepenghe.wifisample.R;
-import com.jackiepenghe.wifisample.adapters.WifiScanResultAdapter;
+import com.jackiepenghe.wifisample.adapters.WifiDeviceAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,11 +64,13 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      * 适配器的数据源
      */
     private List<WifiDevice> adapterList = new ArrayList<>();
+//    private List<ScanResult> adapterList = new ArrayList<>();
 
     /**
      * 适配器
      */
-    private WifiScanResultAdapter wifiScanResultAdapter = new WifiScanResultAdapter(adapterList);
+    private WifiDeviceAdapter wifiScanResultAdapter = new WifiDeviceAdapter(adapterList);
+//    private WifiScanResultAdapter wifiScanResultAdapter = new WifiScanResultAdapter(adapterList);
 
     /**
      * WiFi扫描器的扫描回调
@@ -190,9 +191,9 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          * 用户取消了连接动作
          */
         @Override
-        public void cancelConnect() {
+        public void cancelConnect(String ssid) {
             Tool.warnOut(TAG, "用户取消了本次连接");
-            textView.setText("用户取消了本次连接");
+            Tool.toastL(WifiSearchActivity.this, "取消连接 SSID:" + ssid);
         }
     };
 
@@ -244,7 +245,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     private BaseQuickAdapter.OnItemClickListener onItemClickListener = new BaseQuickAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-            startConnect(adapterList.get(position).getScanResult());
+            startConnect(adapterList.get(position));
         }
     };
 
@@ -396,15 +397,14 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     /**
      * 开始连接
      *
-     * @param scanResult 扫描结果
+     * @param wifiDevice 扫描结果
      */
-    private void startConnect(ScanResult scanResult) {
-        if (scanResult == null) {
+    private void startConnect(WifiDevice wifiDevice) {
+        if (wifiDevice == null) {
             return;
         }
-        wifiOperatingTools.startConnect(WifiSearchActivity.this, scanResult);
+        wifiOperatingTools.startConnect(WifiSearchActivity.this, wifiDevice);
     }
-
     private String intToIp(int i) {
         return (i & 0xFF) + "." +
                 ((i >> 8) & 0xFF) + "." +

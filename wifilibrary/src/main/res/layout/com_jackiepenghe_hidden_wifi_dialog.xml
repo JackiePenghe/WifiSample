@@ -7,7 +7,6 @@
     <EditText
         android:hint="@string/input_wifi_ssid"
         android:id="@+id/wifi_name"
-        style="@style/Base.AlertDialog.AppCompat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:drawable/edit_text"
@@ -17,7 +16,6 @@
     <EditText
         android:hint="@string/input_wifi_password"
         android:id="@+id/wifi_password"
-        style="@style/Base.AlertDialog.AppCompat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:drawable/edit_text"

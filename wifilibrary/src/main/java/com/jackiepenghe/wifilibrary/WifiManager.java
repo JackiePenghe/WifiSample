@@ -1,17 +1,20 @@
 package com.jackiepenghe.wifilibrary;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+
+import com.jackiepenghe.wifilibrary.WifiDevice.EncryptWay;
+
+import java.util.BitSet;
 
 /**
  * @author jackie
@@ -21,6 +24,7 @@ public class WifiManager {
     /*---------------------------静态常量---------------------------*/
 
     static final int REQUEST_CODE_WRITE_SETTINGS = 10;
+    private static final String TAG = WifiManager.class.getSimpleName();
 
     /*---------------------------静态成员变量---------------------------*/
 
@@ -123,7 +127,9 @@ public class WifiManager {
     public static void releaseWifiHotspotCreator() {
         checkInitStatus();
         if (wifiHotspotController != null) {
-            wifiHotspotController.close();
+            if (wifiHotspotController.isWifiApEnabled()) {
+                wifiHotspotController.close();
+            }
             wifiHotspotController.setOnDataReceivedListener(null);
             wifiHotspotController = null;
         }
@@ -258,9 +264,188 @@ public class WifiManager {
      * 设置WiFi
      * @param wifiStateChangedListener WiFi状态改变时调用此接口
      */
+    @SuppressWarnings("unused")
     public static void setWifiStateChangedListener(com.jackiepenghe.wifilibrary.WifiManager.WifiStateChangedListener wifiStateChangedListener) {
         checkInitStatus();
         WifiManager.wifiStatusBroadcastReceiver.setWifiStateChangedListener(wifiStateChangedListener);
+    }
+
+    /**
+     * 获取WiFi的加密方式
+     *
+     * @param config WiFi的配置
+     * @return WiFi加密方式
+     */
+    @SuppressWarnings("WeakerAccess")
+    public static EncryptWay getEncryptWay(WifiConfiguration config) {
+        if (config == null) {
+            return null;
+        }
+        if (config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
+            return EncryptWay.NO_ENCRYPT;
+        }
+
+        //KeyMgmt.WPA2_PSK
+        int wpa2Psk = 4;
+        if (config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_PSK) && config.allowedKeyManagement.get(wpa2Psk)) {
+            return EncryptWay.WPA_WPA2_ENCRYPT;
+        }
+        if (config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_PSK)) {
+            return EncryptWay.WPA_ENCRYPT;
+        }
+        if (config.allowedKeyManagement.get(wpa2Psk)) {
+            return EncryptWay.WPA2_ENCRYPT;
+        }
+        if (config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_EAP) && config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.IEEE8021X)) {
+            return EncryptWay.EAP_ENCRYPT;
+        }
+
+        if (config.wepKeys[0] != null) {
+            return EncryptWay.WEP_ENCRYPT;
+        } else {
+            return EncryptWay.NO_ENCRYPT;
+        }
+    }
+
+    /**
+     * 获取加密方式
+     *
+     * @param scanResult 扫描结果
+     * @return 加密方式的枚举
+     */
+    @SuppressWarnings("WeakerAccess")
+    public static EncryptWay getEncryptionWay(ScanResult scanResult) {
+        String wpaUpper = "WPA";
+        String wpa = "wpa";
+        String wpa2Upper = "WPA2";
+        String wpa2 = "wpa2";
+        String wepUpper = "WEP";
+        String wep = "wep";
+
+        String capabilities = scanResult.capabilities;
+        boolean supportWPA = false;
+        boolean supportWPA2 = false;
+        boolean supportWEP = false;
+        capabilities = capabilities.replace("[", " ");
+        capabilities = capabilities.replace("]", " ");
+        capabilities = capabilities.replace("  ", "\n");
+
+        if (capabilities.contains(wepUpper) || capabilities.contains(wep)) {
+            supportWEP = true;
+        }
+
+        if (capabilities.contains(wpa2Upper) || capabilities.contains(wpa2)) {
+            supportWPA2 = true;
+        }
+
+        if (capabilities.contains(wpaUpper) || capabilities.contains(wpa)) {
+            supportWPA = true;
+        }
+
+        StringBuilder passType = new StringBuilder();
+        if (supportWEP) {
+            passType.append("WEP");
+        }
+
+        if (supportWPA) {
+            if ("".equals(passType.toString())) {
+                passType.append("WPA");
+            } else {
+                passType.append("/WPA");
+            }
+        }
+
+        if (supportWPA2) {
+            if ("".equals(passType.toString())) {
+                passType.append("WPA2");
+            } else {
+                passType.append("/WPA2");
+            }
+        }
+
+        //未加密
+        if ("".equals(passType.toString())) {
+            return EncryptWay.NO_ENCRYPT;
+        }
+        //WEP加密
+        else if (passType.toString().contains(wepUpper)) {
+            return EncryptWay.WEP_ENCRYPT;
+        }
+        //WPA/WPA2加密
+        else if (passType.toString().contains(wpaUpper) && passType.toString().contains(wpa2Upper)) {
+            return EncryptWay.WPA_WPA2_ENCRYPT;
+        }
+        //仅WPA加密
+        else if (passType.toString().contains(wpaUpper)) {
+            return EncryptWay.WPA_ENCRYPT;
+        } else {
+            return EncryptWay.UNKNOWN__ENCRYPT;
+        }
+
+    }
+
+    /**
+     * 获取WiFi的加密方式
+     *
+     * @return WiFi的加密方式
+     */
+    public static String getEncryptionWayString(ScanResult scanResult) {
+        String wpaUpper = "WPA";
+        String wpa = "wpa";
+        String wpa2Upper = "WPA2";
+        String wpa2 = "wpa2";
+        String wepUpper = "WEP";
+        String wep = "wep";
+
+        String capabilities = scanResult.capabilities;
+        boolean supportWPA = false;
+        boolean supportWPA2 = false;
+        boolean supportWEP = false;
+        capabilities = capabilities.replace("[", " ");
+        capabilities = capabilities.replace("]", " ");
+        capabilities = capabilities.replace("  ", "\n");
+
+        if (capabilities.contains(wepUpper) || capabilities.contains(wep)) {
+            supportWEP = true;
+        }
+
+        if (capabilities.contains(wpa2Upper) || capabilities.contains(wpa2)) {
+            supportWPA2 = true;
+        }
+
+        if (capabilities.contains(wpaUpper) || capabilities.contains(wpa)) {
+            supportWPA = true;
+        }
+
+        StringBuilder passType = new StringBuilder();
+        if (supportWEP) {
+            passType.append("WEP");
+        }
+
+        if (supportWPA) {
+            if ("".equals(passType.toString())) {
+                passType.append("WPA");
+            } else {
+                passType.append("/WPA");
+            }
+        }
+
+        if (supportWPA2) {
+            if ("".equals(passType.toString())) {
+                passType.append("WPA2");
+            } else {
+                passType.append("/WPA2");
+            }
+        }
+
+        if ("".equals(passType.toString())) {
+            passType.append(context.getString(R.string.opened));
+        } else {
+            passType.append(" ")
+                    .append(context.getString(R.string.encryption));
+        }
+
+        return passType.toString();
     }
 
     /*---------------------------接口定义---------------------------*/

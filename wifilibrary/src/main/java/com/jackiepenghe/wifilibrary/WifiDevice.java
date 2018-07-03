@@ -43,6 +43,82 @@ public class WifiDevice {
         this.scanResult = scanResult;
     }
 
+    public String getEncryptionWayString() {
+        return WifiManager.getEncryptionWayString(scanResult);
+    }
+
+    /*---------------------------枚举定义---------------------------*/
+
+    /**
+     * 加密方式的枚举
+     */
+    public enum EncryptWay {
+        /**
+         * 未加密
+         */
+        NO_ENCRYPT(1),
+        /**
+         * WPA/WPA2加密
+         */
+        WPA_WPA2_ENCRYPT(2),
+        /**
+         * WEP加密
+         */
+        WEP_ENCRYPT(3),
+        /**
+         * 仅WPA加密
+         */
+        WPA_ENCRYPT(4),
+        /**
+         * PSK加密
+         */
+        EAP_ENCRYPT(5),
+        /**
+         * 仅WPA2加密
+         */
+        WPA2_ENCRYPT(6),
+        /**
+         * 未知加密方式
+         */
+        UNKNOWN__ENCRYPT(7);
+
+        int encryptWay;
+
+        EncryptWay(int encryptWay) {
+            this.encryptWay = encryptWay;
+        }
+
+        /**
+         * 获取当前的枚举的值
+         *
+         * @return 当前的枚举的值
+         */
+        @SuppressWarnings("unused")
+        public int getEncryptWayValue() {
+            return encryptWay;
+        }
+
+        /**
+         * 通过枚举的值来获取枚举对象
+         *
+         * @param encryptWayValue 枚举的值
+         * @return 枚举对象
+         */
+        @SuppressWarnings("unused")
+        public static EncryptWay getEncryptWayByValue(int encryptWayValue) {
+            switch (encryptWayValue) {
+                case 1:
+                    return EncryptWay.NO_ENCRYPT;
+                case 2:
+                    return EncryptWay.WPA_WPA2_ENCRYPT;
+                case 3:
+                    return EncryptWay.WEP_ENCRYPT;
+                default:
+                    return EncryptWay.UNKNOWN__ENCRYPT;
+            }
+        }
+    }
+
     /*---------------------------getter---------------------------*/
 
     public ScanResult getScanResult() {
@@ -61,54 +137,54 @@ public class WifiDevice {
     }
 
     @SuppressWarnings("unused")
-    public String getCapabilities(){
+    public String getCapabilities() {
         return scanResult.capabilities;
     }
 
     @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.M)
     @TargetApi(Build.VERSION_CODES.M)
-    public int getCenterFreq0(){
+    public int getCenterFreq0() {
         return scanResult.centerFreq0;
     }
 
     @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.M)
     @TargetApi(Build.VERSION_CODES.M)
-    public int getCenterFreq1(){
+    public int getCenterFreq1() {
         return scanResult.centerFreq1;
     }
 
     @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.M)
     @TargetApi(Build.VERSION_CODES.M)
-    public int getChannelWidth(){
+    public int getChannelWidth() {
         return scanResult.channelWidth;
     }
 
     @SuppressWarnings("unused")
-    public int getFrequency(){
+    public int getFrequency() {
         return scanResult.frequency;
     }
 
     @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.M)
     @TargetApi(Build.VERSION_CODES.M)
-    public CharSequence getOperatorFriendlyName(){
+    public CharSequence getOperatorFriendlyName() {
         return scanResult.operatorFriendlyName;
     }
 
     @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @TargetApi(Build.VERSION_CODES.M)
-    public long getTimestamp(){
+    public long getTimestamp() {
         return scanResult.timestamp;
     }
 
     @SuppressWarnings("unused")
     @RequiresApi(api = Build.VERSION_CODES.M)
     @TargetApi(Build.VERSION_CODES.M)
-    public CharSequence getVenueName(){
+    public CharSequence getVenueName() {
         return scanResult.venueName;
     }
 
@@ -147,67 +223,7 @@ public class WifiDevice {
         }
     }
 
-    /**
-     * 获取WiFi的加密方式
-     *
-     * @return WiFi的加密方式
-     */
-    public String getEncryptionWayString() {
-        String wpaUpper = "WPA";
-        String wpa = "wpa";
-        String wpa2Upper = "WPA2";
-        String wpa2 = "wpa2";
-        String wepUpper = "WEP";
-        String wep = "wep";
-
-        String capabilities = scanResult.capabilities;
-        boolean supportWPA = false;
-        boolean supportWPA2 = false;
-        boolean supportWEP = false;
-        capabilities = capabilities.replace("[", " ");
-        capabilities = capabilities.replace("]", " ");
-        capabilities = capabilities.replace("  ", "\n");
-
-        if (capabilities.contains(wepUpper) || capabilities.contains(wep)) {
-            supportWEP = true;
-        }
-
-        if (capabilities.contains(wpa2Upper) || capabilities.contains(wpa2)) {
-            supportWPA2 = true;
-        }
-
-        if (capabilities.contains(wpaUpper) || capabilities.contains(wpa)) {
-            supportWPA = true;
-        }
-
-        StringBuilder passType = new StringBuilder();
-        if (supportWEP) {
-            passType.append("WEP");
-        }
-
-        if (supportWPA) {
-            if ("".equals(passType.toString())) {
-                passType.append("WPA");
-            } else {
-                passType.append("/WPA");
-            }
-        }
-
-        if (supportWPA2) {
-            if ("".equals(passType.toString())) {
-                passType.append("WPA2");
-            } else {
-                passType.append("/WPA2");
-            }
-        }
-
-        if ("".equals(passType.toString())) {
-            passType.append(context.getString(R.string.opened));
-        } else {
-            passType.append(" ")
-                    .append(context.getString(R.string.encryption));
-        }
-
-        return passType.toString();
+    public EncryptWay getEncryptWay(){
+        return WifiManager.getEncryptionWay(scanResult);
     }
 }
