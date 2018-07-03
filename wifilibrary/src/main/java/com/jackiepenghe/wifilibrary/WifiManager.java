@@ -6,15 +6,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 
 import com.jackiepenghe.wifilibrary.WifiDevice.EncryptWay;
-
-import java.util.BitSet;
 
 /**
  * @author jackie
@@ -24,7 +22,6 @@ public class WifiManager {
     /*---------------------------静态常量---------------------------*/
 
     static final int REQUEST_CODE_WRITE_SETTINGS = 10;
-    private static final String TAG = WifiManager.class.getSimpleName();
 
     /*---------------------------静态成员变量---------------------------*/
 
@@ -152,6 +149,7 @@ public class WifiManager {
 
     /**
      * 安卓6.0以上的手机在创建WiFi热点时，需要修改系统设置的权限，可以用这个函数进行判断
+     *
      * @return true表示有权限
      */
     public static boolean hasWifiHotspotPermission() {
@@ -262,49 +260,13 @@ public class WifiManager {
 
     /**
      * 设置WiFi
+     *
      * @param wifiStateChangedListener WiFi状态改变时调用此接口
      */
     @SuppressWarnings("unused")
     public static void setWifiStateChangedListener(com.jackiepenghe.wifilibrary.WifiManager.WifiStateChangedListener wifiStateChangedListener) {
         checkInitStatus();
         WifiManager.wifiStatusBroadcastReceiver.setWifiStateChangedListener(wifiStateChangedListener);
-    }
-
-    /**
-     * 获取WiFi的加密方式
-     *
-     * @param config WiFi的配置
-     * @return WiFi加密方式
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static EncryptWay getEncryptWay(WifiConfiguration config) {
-        if (config == null) {
-            return null;
-        }
-        if (config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.NONE)) {
-            return EncryptWay.NO_ENCRYPT;
-        }
-
-        //KeyMgmt.WPA2_PSK
-        int wpa2Psk = 4;
-        if (config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_PSK) && config.allowedKeyManagement.get(wpa2Psk)) {
-            return EncryptWay.WPA_WPA2_ENCRYPT;
-        }
-        if (config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_PSK)) {
-            return EncryptWay.WPA_ENCRYPT;
-        }
-        if (config.allowedKeyManagement.get(wpa2Psk)) {
-            return EncryptWay.WPA2_ENCRYPT;
-        }
-        if (config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.WPA_EAP) && config.allowedKeyManagement.get(WifiConfiguration.KeyMgmt.IEEE8021X)) {
-            return EncryptWay.EAP_ENCRYPT;
-        }
-
-        if (config.wepKeys[0] != null) {
-            return EncryptWay.WEP_ENCRYPT;
-        } else {
-            return EncryptWay.NO_ENCRYPT;
-        }
     }
 
     /**
@@ -446,6 +408,42 @@ public class WifiManager {
         }
 
         return passType.toString();
+    }
+
+    /**
+     * 获取当前已连接的WiFi的信息
+     *
+     * @return 当前已连接的WiFi的信息
+     */
+    @SuppressWarnings("WeakerAccess")
+    public static WifiInfo getConnectedWifiInfo() {
+        checkInitStatus();
+        if (!isWifiEnabled()) {
+            return null;
+        }
+        WifiInfo connectionInfo = systemWifiManager.getConnectionInfo();
+        if (connectionInfo == null) {
+            return null;
+        }
+        return connectionInfo;
+    }
+
+    /**
+     * 获取已连接的WiFi的SSID名称
+     *
+     * @return 已连接的WiFi的SSID名称
+     */
+    @SuppressWarnings("unused")
+    public static String getConnectedWifiSSID() {
+        checkInitStatus();
+        if (!isWifiEnabled()) {
+            return null;
+        }
+        WifiInfo connectedWifiInfo = getConnectedWifiInfo();
+        if (connectedWifiInfo == null) {
+            return null;
+        }
+        return connectedWifiInfo.getSSID();
     }
 
     /*---------------------------接口定义---------------------------*/
