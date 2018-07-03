@@ -175,6 +175,35 @@ public class WifiOperatingTools {
     /**
      * 初始化
      */
+    @SuppressWarnings("unused")
+    public void init() {
+        init(new DefaultWifiScanCallback(), new DefaultWifiConnectCallback());
+    }
+
+    /**
+     * 初始化
+     * @param wifiScanCallback WiFi扫描相关的回调
+     */
+    @SuppressWarnings("unused")
+    public void init(@NonNull WifiScanCallback wifiScanCallback){
+        init(wifiScanCallback, new DefaultWifiConnectCallback());
+    }
+
+    /**
+     * 初始化
+     * @param wifiConnectCallback WiFi连接相关的回调
+     */
+    @SuppressWarnings("unused")
+    public void init(@NonNull WifiConnectCallback wifiConnectCallback){
+        init(new DefaultWifiScanCallback(),wifiConnectCallback);
+    }
+
+    /**
+     * 初始化
+     *
+     * @param wifiScanCallback    WiFi扫描相关的回调
+     * @param wifiConnectCallback WiFi连接相关的回调
+     */
     public void init(@NonNull WifiScanCallback wifiScanCallback, @NonNull WifiConnectCallback wifiConnectCallback) {
         this.wifiScanCallback = wifiScanCallback;
         wifiConnectStatusBroadcastReceiver.setWifiConnectCallback(wifiConnectCallback);
@@ -187,8 +216,8 @@ public class WifiOperatingTools {
      */
     public void startScan() {
         checkInitStatus();
-        if (!WifiManager.isWifiEnabled()){
-            if (wifiScanCallback != null){
+        if (!WifiManager.isWifiEnabled()) {
+            if (wifiScanCallback != null) {
                 wifiScanCallback.startScanFailed();
             }
             WifiManager.enableWifi(true);
