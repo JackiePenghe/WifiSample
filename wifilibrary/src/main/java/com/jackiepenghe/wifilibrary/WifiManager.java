@@ -239,6 +239,20 @@ public class WifiManager {
     }
 
     /**
+     * 将int型的IP转为IP_V4格式的字符串
+     *
+     * @param i int型的IP
+     * @return IP_V4格式的字符串
+     */
+    @SuppressWarnings("unused")
+    public static String intIpToIpV4String(int i) {
+        return (i & 0xFF) + "." +
+                ((i >> 8) & 0xFF) + "." +
+                ((i >> 16) & 0xFF) + "." +
+                (i >> 24 & 0xFF);
+    }
+
+    /**
      * 获取上下文
      *
      * @return 上下文

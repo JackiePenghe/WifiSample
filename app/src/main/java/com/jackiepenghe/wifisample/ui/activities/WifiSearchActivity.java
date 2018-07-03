@@ -46,11 +46,6 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     private TextView textView;
 
     /**
-     * 发送数据
-     */
-    private Button sendDataButton;
-
-    /**
      * 开始搜索按钮
      */
     private Button searchButton;
@@ -233,9 +228,6 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
                 case R.id.start_search:
                     startScan();
                     break;
-                case R.id.send_data:
-                    sendData();
-                    break;
                 default:
                     break;
             }
@@ -293,7 +285,6 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
         searchButton = findViewById(R.id.start_search);
         recyclerView = findViewById(R.id.recycler_view);
         textView = findViewById(R.id.connect_status);
-        sendDataButton = findViewById(R.id.send_data);
     }
 
     /**
@@ -318,7 +309,6 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     @Override
     protected void initEvents() {
         searchButton.setOnClickListener(onClickListener);
-        sendDataButton.setOnClickListener(onClickListener);
     }
 
     /**
@@ -404,18 +394,5 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
             return;
         }
         wifiOperatingTools.startConnect(WifiSearchActivity.this, wifiDevice);
-    }
-    private String intToIp(int i) {
-        return (i & 0xFF) + "." +
-                ((i >> 8) & 0xFF) + "." +
-                ((i >> 16) & 0xFF) + "." +
-                (i >> 24 & 0xFF);
-    }
-
-    /**
-     * 发送数据
-     */
-    private void sendData() {
-
     }
 }
