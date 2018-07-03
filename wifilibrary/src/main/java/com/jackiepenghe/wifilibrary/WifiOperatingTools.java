@@ -187,6 +187,13 @@ public class WifiOperatingTools {
      */
     public void startScan() {
         checkInitStatus();
+        if (!WifiManager.isWifiEnabled()){
+            if (wifiScanCallback != null){
+                wifiScanCallback.startScanFailed();
+            }
+            WifiManager.enableWifi(true);
+            return;
+        }
         boolean result = systemWifiManager.startScan();
         if (!result) {
             if (wifiScanCallback != null) {

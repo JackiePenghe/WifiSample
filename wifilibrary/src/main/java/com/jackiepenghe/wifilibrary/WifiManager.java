@@ -52,17 +52,6 @@ public class WifiManager {
      */
     private static WifiStatusBroadcastReceiver wifiStatusBroadcastReceiver;
 
-    /*---------------------------库内函数---------------------------*/
-
-//    /**
-//     * 获取WiFi相关的广播接收者
-//     *
-//     * @return WiFi相关的广播接收者
-//     */
-//    static WifiStatusBroadcastReceiver getWifiStatusBroadcastReceiver() {
-//        return wifiStatusBroadcastReceiver;
-//    }
-
     /*---------------------------公开函数---------------------------*/
 
     /**
