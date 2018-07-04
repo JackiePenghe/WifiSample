@@ -33,7 +33,6 @@ dependencies {
     implementation project(':wifilibrary')
     //常用基础库
     implementation 'com.jackiepenghe:baselibrary:0.8.5'
-//    implementation 'com.jackiepenghe:wifilibrary:0.0.2'
     //动态权限库
     //noinspection GradleDependency
     implementation 'com.yanzhenjie:permission:2.0.0-rc11'
