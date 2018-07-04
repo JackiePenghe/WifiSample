@@ -122,22 +122,24 @@ public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
                 } else if (info.getState().equals(NetworkInfo.State.CONNECTED)) {
                     WifiInfo wifiInfo = systemWifiManager.getConnectionInfo();
                     NetworkInfo.DetailedState state = info.getDetailedState();
+                    String ssid = wifiInfo.getSSID();
+                    Tool.warnOut(TAG,"ssid = " + ssid);
                     if (state == NetworkInfo.DetailedState.AUTHENTICATING) {
                         if (wifiConnectCallback != null) {
-                            wifiConnectCallback.authenticating(wifiInfo.getSSID());
+                            wifiConnectCallback.authenticating(ssid);
                         }
                     } else if (state == NetworkInfo.DetailedState.OBTAINING_IPADDR) {
                         if (wifiConnectCallback != null) {
-                            wifiConnectCallback.obtainingIpAddress(wifiInfo.getSSID());
+                            wifiConnectCallback.obtainingIpAddress(ssid);
                         }
                     } else if (state == NetworkInfo.DetailedState.FAILED) {
                         if (wifiConnectCallback != null) {
-                            wifiConnectCallback.connectFailed(wifiInfo.getSSID());
+                            wifiConnectCallback.connectFailed(ssid);
                         }
                     }
                     //获取当前wifi名称
                     if (wifiConnectCallback != null) {
-                        wifiConnectCallback.connected(wifiInfo.getSSID());
+                        wifiConnectCallback.connected(ssid);
                     }
                 } else if (info.getState().equals(NetworkInfo.State.DISCONNECTING)) {
                     wifiConnectCallback.disconnecting();

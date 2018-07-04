@@ -103,11 +103,11 @@ public class WifiOperatingTools {
         EncryptWay encryptWay = wifiDevice.getEncryptWay();
         //需要密码
         if (encryptWay != EncryptWay.NO_ENCRYPT) {
-            //搜到的WiFi的SSID有内容（可见WiFi）
-            if (wifiDevice.getSSID() != null && !"".equals(wifiDevice.getSSID())) {
+           //连接WiFi
+            if (!wifiDevice.isHidden()) {
                 showConnectWifiWithPassWord(activity, wifiDevice);
             }
-            //搜到的WiFi的SSID无内容（隐藏的WiFi）
+            //连接隐藏的WiFi
             else {
                 Tool.warnOut(TAG, "连接隐藏WiFi");
                 showConnectWifiWithNameAndPassWord(activity, encryptWay);

@@ -105,7 +105,6 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
                     ScanResult scanResult = scanResults.get(i);
                     String ssid = scanResult.SSID;
                     if (ssid == null || "".equals(ssid)) {
-                        scanResult.SSID = context.getString(R.string.hidden_network);
                         scanResults.remove(i);
                         scanResults.add(scanResult);
                     }
@@ -115,7 +114,16 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
 
                 ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
                 for (int i = 0; i < size; i++) {
-                    WifiDevice wifiDevice = new WifiDevice(context, scanResults.get(i));
+                    WifiDevice wifiDevice;
+                    ScanResult scanResult = scanResults.get(i);
+                    String ssid = scanResult.SSID;
+                    if (ssid == null || "".equals(ssid)) {
+                        scanResult.SSID = context.getString(R.string.hidden_network);
+                        wifiDevice = new WifiDevice(context, scanResult, true);
+                    }else {
+                        wifiDevice = new WifiDevice(context, scanResult);
+
+                    }
                     wifiDevices.add(wifiDevice);
                 }
 

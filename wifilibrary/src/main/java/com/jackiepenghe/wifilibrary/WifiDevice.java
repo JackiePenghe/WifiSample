@@ -31,20 +31,34 @@ public class WifiDevice {
      * 上下文
      */
     private Context context;
+
+    /**
+     * 是否是隐藏WiFi
+     */
+    private boolean hidden;
     /*---------------------------构造方法---------------------------*/
 
     /**
      * 构造方法
      *
+     * @param context 上下文
      * @param scanResult WiFi设备扫描结果
      */
     WifiDevice(Context context, ScanResult scanResult) {
-        this.context = context;
-        this.scanResult = scanResult;
+      this(context,scanResult,false);
     }
 
-    public String getEncryptionWayString() {
-        return WifiManager.getEncryptionWayString(scanResult);
+    /**
+     * 构造方法
+     * @param context 上下文
+     * @param scanResult WiFi设备扫描结果
+     * @param hidden 是否是隐藏WiFi
+     */
+    @SuppressWarnings("WeakerAccess")
+    public WifiDevice(Context context, ScanResult scanResult, boolean hidden) {
+        this.scanResult = scanResult;
+        this.context = context;
+        this.hidden = hidden;
     }
 
     /*---------------------------枚举定义---------------------------*/
@@ -134,6 +148,18 @@ public class WifiDevice {
     @SuppressWarnings("unused")
     public String getBSSID() {
         return scanResult.BSSID;
+    }
+
+    public String getFormatSSID(){
+        return "\"" +  scanResult.SSID + "\"";
+    }
+
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public String getEncryptionWayString() {
+        return WifiManager.getEncryptionWayString(scanResult);
     }
 
     @SuppressWarnings("unused")
