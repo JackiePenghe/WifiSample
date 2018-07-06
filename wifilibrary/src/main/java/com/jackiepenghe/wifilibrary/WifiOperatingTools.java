@@ -98,7 +98,9 @@ public class WifiOperatingTools {
             systemWifiManager.enableNetwork(netId, true);
             return;
         }
-        wifiConnectCallback.connectFailed(wifiInfo.getSSID());
+        if (wifiConnectCallback != null) {
+            wifiConnectCallback.connectFailed(wifiInfo.getSSID());
+        }
     }
 
     /**
@@ -427,7 +429,7 @@ public class WifiOperatingTools {
 
         for (WifiConfiguration existingConfig : existingConfigs) {
 //            if (existingConfig.SSID.equals("\"" + ssid + "\"") || existingConfig.SSID.equals(ssid)) {
-            if (WifiManager.isWifiSsidEquals(existingConfig.SSID,ssid)){
+            if (WifiManager.isWifiSsidEquals(existingConfig.SSID, ssid)) {
                 return existingConfig.networkId;
             }
         }
