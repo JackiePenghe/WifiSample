@@ -316,6 +316,23 @@ public class WifiOperatingTools {
         return intToIp(ipAdd);
     }
 
+    /**
+     * 设置扫描相关的回调
+     * @param wifiScanCallback 扫描相关的回调
+     */
+    public void setWifiScanCallback(WifiScanCallback wifiScanCallback) {
+        this.wifiScanCallback = wifiScanCallback;
+    }
+
+    /**
+     * 设置连接相关的回调
+     * @param wifiConnectCallback 接相关的回调
+     */
+    public void setWifiConnectCallback(WifiConnectCallback wifiConnectCallback) {
+        this.wifiConnectCallback = wifiConnectCallback;
+        wifiConnectStatusBroadcastReceiver.setWifiConnectCallback(wifiConnectCallback);
+    }
+
     /*---------------------------接口定义---------------------------*/
 
     /**
