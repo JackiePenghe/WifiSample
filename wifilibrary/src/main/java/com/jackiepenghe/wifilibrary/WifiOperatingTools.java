@@ -285,7 +285,9 @@ public class WifiOperatingTools {
      */
     public void setWifiScanResultObtainedListener(WifiScanResultObtainedListener wifiScanResultObtainedListener) {
         checkInitStatus();
-        wifiScanDataAndStatusBroadcastReceiver.setWifiScanResultObtainedListener(wifiScanResultObtainedListener);
+        if (wifiScanDataAndStatusBroadcastReceiver != null) {
+            wifiScanDataAndStatusBroadcastReceiver.setWifiScanResultObtainedListener(wifiScanResultObtainedListener);
+        }
     }
 
     /*---------------------------公开方法---------------------------*/
