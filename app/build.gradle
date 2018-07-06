@@ -7,8 +7,8 @@ android {
         minSdkVersion 14
         //noinspection OldTargetApi
         targetSdkVersion 27
-        versionCode 14
-        versionName "0.1.4"
+        versionCode 15
+        versionName "0.1.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -32,7 +32,7 @@ dependencies {
     //WiFi库的Module
     implementation project(':wifilibrary')
     //常用基础库
-    implementation 'com.jackiepenghe:baselibrary:0.8.5'
+    implementation 'com.jackiepenghe:baselibrary:0.8.6'
     //动态权限库
     //noinspection GradleDependency
     implementation 'com.yanzhenjie:permission:2.0.0-rc11'

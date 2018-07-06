@@ -318,6 +318,7 @@ public class WifiOperatingTools {
 
     /**
      * 设置扫描相关的回调
+     *
      * @param wifiScanCallback 扫描相关的回调
      */
     public void setWifiScanCallback(WifiScanCallback wifiScanCallback) {
@@ -326,11 +327,22 @@ public class WifiOperatingTools {
 
     /**
      * 设置连接相关的回调
+     *
      * @param wifiConnectCallback 接相关的回调
      */
     public void setWifiConnectCallback(WifiConnectCallback wifiConnectCallback) {
         this.wifiConnectCallback = wifiConnectCallback;
         wifiConnectStatusBroadcastReceiver.setWifiConnectCallback(wifiConnectCallback);
+    }
+
+    /**
+     * 断开当前WiFi
+     *
+     * @return 请求是否成功
+     */
+    public boolean disconnect() {
+        checkInitStatus();
+        return systemWifiManager.disconnect();
     }
 
     /*---------------------------接口定义---------------------------*/
