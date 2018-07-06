@@ -449,6 +449,18 @@ public class WifiManager {
         return connectedWifiInfo.getSSID();
     }
 
+    /**
+     * 判断两个SSID是否相同
+     *
+     * @param ssid1 SSID1
+     * @param ssid2 SSID2
+     * @return true表示相同
+     */
+    public static boolean isWifiSsidEquals(String ssid1, String ssid2) {
+        String doubleQuotes = "\"";
+        return ssid1.equals(doubleQuotes + ssid2 + doubleQuotes) || ssid1.equals(ssid2) || ssid2.equals(doubleQuotes + ssid1 + doubleQuotes);
+    }
+
     /*---------------------------接口定义---------------------------*/
 
     /**

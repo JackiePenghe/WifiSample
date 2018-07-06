@@ -87,7 +87,22 @@ public class WifiOperatingTools {
     /*---------------------------公开方法---------------------------*/
 
     /**
-     * 开始连接
+     * 发起连接
+     *
+     * @param wifiInfo WifiInfo
+     */
+    @SuppressWarnings("unused")
+    public void startConnect(WifiInfo wifiInfo) {
+        int netId = isExists(wifiInfo.getSSID());
+        if (-1 != netId) {
+            systemWifiManager.enableNetwork(netId, true);
+            return;
+        }
+        wifiConnectCallback.connectFailed(wifiInfo.getSSID());
+    }
+
+    /**
+     * 发起连接
      *
      * @param activity   Activity
      * @param wifiDevice 扫描设备
@@ -103,7 +118,7 @@ public class WifiOperatingTools {
         EncryptWay encryptWay = wifiDevice.getEncryptWay();
         //需要密码
         if (encryptWay != EncryptWay.NO_ENCRYPT) {
-           //连接WiFi
+            //连接WiFi
             if (!wifiDevice.isHidden()) {
                 showConnectWifiWithPassWord(activity, wifiDevice);
             }
@@ -182,20 +197,22 @@ public class WifiOperatingTools {
 
     /**
      * 初始化
+     *
      * @param wifiScanCallback WiFi扫描相关的回调
      */
     @SuppressWarnings("unused")
-    public void init(@NonNull WifiScanCallback wifiScanCallback){
+    public void init(@NonNull WifiScanCallback wifiScanCallback) {
         init(wifiScanCallback, new DefaultWifiConnectCallback());
     }
 
     /**
      * 初始化
+     *
      * @param wifiConnectCallback WiFi连接相关的回调
      */
     @SuppressWarnings("unused")
-    public void init(@NonNull WifiConnectCallback wifiConnectCallback){
-        init(new DefaultWifiScanCallback(),wifiConnectCallback);
+    public void init(@NonNull WifiConnectCallback wifiConnectCallback) {
+        init(new DefaultWifiScanCallback(), wifiConnectCallback);
     }
 
     /**
@@ -409,7 +426,8 @@ public class WifiOperatingTools {
         List<WifiConfiguration> existingConfigs = systemWifiManager.getConfiguredNetworks();
 
         for (WifiConfiguration existingConfig : existingConfigs) {
-            if (existingConfig.SSID.equals("\"" + ssid + "\"")) {
+//            if (existingConfig.SSID.equals("\"" + ssid + "\"") || existingConfig.SSID.equals(ssid)) {
+            if (WifiManager.isWifiSsidEquals(existingConfig.SSID,ssid)){
                 return existingConfig.networkId;
             }
         }
