@@ -97,11 +97,19 @@ public class WifiOperatingTools {
      *
      * @param wifiInfo WifiInfo
      */
-    @SuppressWarnings("unused")
     public void startConnect(WifiInfo wifiInfo) {
         int netId = isExists(wifiInfo.getSSID());
         if (-1 != netId) {
-            systemWifiManager.enableNetwork(netId, true);
+            boolean enableNetwork = systemWifiManager.enableNetwork(netId, true);
+            if (enableNetwork) {
+                if (wifiConnectCallback != null) {
+                    wifiConnectCallback.connecting(wifiInfo.getSSID());
+                }
+            } else {
+                if (wifiConnectCallback != null) {
+                    wifiConnectCallback.connectFailed(wifiInfo.getSSID());
+                }
+            }
             return;
         }
         if (wifiConnectCallback != null) {
@@ -117,14 +125,31 @@ public class WifiOperatingTools {
      */
     public void startConnect(Activity activity, WifiDevice wifiDevice) {
         checkInitStatus();
+        String connectedWifiSSID = WifiManager.getConnectedWifiSSID();
+
+        if (connectedWifiSSID != null && WifiManager.isWifiSsidEquals(connectedWifiSSID,wifiDevice.getSSID())){
+            if (wifiConnectCallback != null){
+                wifiConnectCallback.connected(wifiDevice.getSSID());
+            }
+            return;
+        }
         int netId = isExists(wifiDevice.getSSID());
         if (-1 != netId) {
-            systemWifiManager.enableNetwork(netId, true);
+            boolean enableNetwork = systemWifiManager.enableNetwork(netId, true);
+            if (enableNetwork) {
+                if (wifiConnectCallback != null) {
+                    wifiConnectCallback.connecting(wifiDevice.getSSID());
+                }
+            } else {
+                if (wifiConnectCallback != null) {
+                    wifiConnectCallback.connectFailed(wifiDevice.getSSID());
+                }
+            }
             return;
         }
 
         EncryptWay encryptWay = wifiDevice.getEncryptWay();
-        //需要密码
+        //不需要密码
         if (encryptWay != EncryptWay.NO_ENCRYPT) {
             //连接WiFi
             if (!wifiDevice.isHidden()) {
@@ -136,7 +161,7 @@ public class WifiOperatingTools {
                 showConnectWifiWithNameAndPassWord(activity, encryptWay);
             }
         } else {
-            WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), "", encryptWay);
+            WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), "", encryptWay, false);
             connect(wifiConfiguration);
         }
     }
@@ -171,7 +196,7 @@ public class WifiOperatingTools {
                             Tool.toastL(context, R.string.wifi_password_null);
                             return;
                         }
-                        WifiConfiguration wifiConfiguration = createWifiInfo(wifiName, wifiPassword, encryptionWay);
+                        WifiConfiguration wifiConfiguration = createWifiInfo(wifiName, wifiPassword, encryptionWay, true);
                         connect(wifiConfiguration);
                     }
                 })
@@ -527,7 +552,6 @@ public class WifiOperatingTools {
         List<WifiConfiguration> existingConfigs = systemWifiManager.getConfiguredNetworks();
 
         for (WifiConfiguration existingConfig : existingConfigs) {
-//            if (existingConfig.SSID.equals("\"" + ssid + "\"") || existingConfig.SSID.equals(ssid)) {
             if (WifiManager.isWifiSsidEquals(existingConfig.SSID, ssid)) {
                 return existingConfig.networkId;
             }
@@ -535,7 +559,57 @@ public class WifiOperatingTools {
         return -1;
     }
 
-    private WifiConfiguration createWifiInfo(String ssid, String password, EncryptWay encryptWay) {
+    /**
+     * 安卓8.0及以上的系统使用这个方法创建
+     *
+     * @param ssid         网络SSID
+     * @param password     密码
+     * @param encryptWay   加密方式
+     * @param isHiddenSSID 是否为隐藏WiFi
+     * @return WifiConfiguration
+     */
+    private WifiConfiguration createWifiInfoO(String ssid, String password, EncryptWay encryptWay, boolean isHiddenSSID) {
+        WifiConfiguration config = new WifiConfiguration();
+        config.allowedAuthAlgorithms.clear();
+        config.allowedGroupCiphers.clear();
+        config.allowedKeyManagement.clear();
+        config.allowedPairwiseCiphers.clear();
+        config.allowedProtocols.clear();
+        config.SSID = "\"" + ssid + "\"";
+        if (encryptWay == EncryptWay.NO_ENCRYPT) {
+            config.allowedKeyManagement.set(KeyMgmt.NONE);
+            config.hiddenSSID = isHiddenSSID;
+        } else if (encryptWay == EncryptWay.WEP_ENCRYPT) {
+            config.preSharedKey = "\"" + password + "\"";
+            config.hiddenSSID = isHiddenSSID;
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            config.allowedKeyManagement.set(KeyMgmt.NONE);
+        } else if (encryptWay == EncryptWay.WPA_ENCRYPT || encryptWay == EncryptWay.WPA_WPA2_ENCRYPT) {
+            config.preSharedKey = "\"" + password + "\"";
+            config.hiddenSSID = isHiddenSSID;
+            config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
+            config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+            config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+            config.status = WifiConfiguration.Status.ENABLED;
+        } else {
+            return null;
+        }
+        return config;
+    }
+
+    /**
+     * 低版本使用这个方法创建
+     *
+     * @param ssid         网络SSID
+     * @param password     密码
+     * @param encryptWay   加密方式
+     * @param isHiddenSSID 是否为隐藏WiFi
+     * @return WifiConfiguration
+     */
+    private WifiConfiguration createWifiInfoNormal(String ssid, String password, EncryptWay encryptWay, boolean isHiddenSSID) {
         Log.w(TAG, "ssid = " + ssid + "password " + password + "encryptWay =" + encryptWay);
         WifiConfiguration config = new WifiConfiguration();
         config.allowedAuthAlgorithms.clear();
@@ -547,10 +621,11 @@ public class WifiOperatingTools {
         if (encryptWay == EncryptWay.NO_ENCRYPT) {
             config.wepKeys[0] = "\"" + "\"";
             config.allowedKeyManagement.set(KeyMgmt.NONE);
+            config.hiddenSSID = isHiddenSSID;
             config.wepTxKeyIndex = 0;
         } else if (encryptWay == EncryptWay.WEP_ENCRYPT) {
             config.preSharedKey = "\"" + password + "\"";
-            config.hiddenSSID = true;
+            config.hiddenSSID = isHiddenSSID;
             config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
@@ -560,7 +635,7 @@ public class WifiOperatingTools {
             config.wepTxKeyIndex = 0;
         } else if (encryptWay == EncryptWay.WPA_ENCRYPT || encryptWay == EncryptWay.WPA_WPA2_ENCRYPT) {
             config.preSharedKey = "\"" + password + "\"";
-            config.hiddenSSID = true;
+            config.hiddenSSID = isHiddenSSID;
             config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
             config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
@@ -572,6 +647,14 @@ public class WifiOperatingTools {
             return null;
         }
         return config;
+    }
+
+    private WifiConfiguration createWifiInfo(String ssid, String password, EncryptWay encryptWay, boolean isHiddenSSID) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return createWifiInfoO(ssid, password, encryptWay, isHiddenSSID);
+        } else {
+            return createWifiInfoNormal(ssid, password, encryptWay, isHiddenSSID);
+        }
     }
 
     /**
@@ -596,7 +679,7 @@ public class WifiOperatingTools {
                             showConnectWifiWithPassWord(activity, wifiDevice);
                             return;
                         }
-                        WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), password, wifiDevice.getEncryptWay());
+                        WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), password, wifiDevice.getEncryptWay(), false);
                         connect(wifiConfiguration);
                     }
                 })
@@ -630,7 +713,16 @@ public class WifiOperatingTools {
             }
             return;
         }
-        systemWifiManager.enableNetwork(network, true);
+        boolean enableNetwork = systemWifiManager.enableNetwork(network, true);
+        if (enableNetwork){
+            if (wifiConnectCallback != null) {
+                wifiConnectCallback.connecting(config.SSID);
+            }
+        }else {
+            if (wifiConnectCallback != null) {
+                wifiConnectCallback.connectFailed(config.SSID);
+            }
+        }
     }
 
     /**

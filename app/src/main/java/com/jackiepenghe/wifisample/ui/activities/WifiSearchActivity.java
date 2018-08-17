@@ -65,7 +65,6 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      * 适配器
      */
     private WifiDeviceAdapter wifiScanResultAdapter = new WifiDeviceAdapter(adapterList);
-//    private WifiScanResultAdapter wifiScanResultAdapter = new WifiScanResultAdapter(adapterList);
 
     /**
      * WiFi扫描器的扫描回调
@@ -95,6 +94,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void connecting(String ssid) {
+            Tool.warnOut(TAG,"connecting ssid = " + ssid);
             if (alertDialog != null) {
                 return;
             }
@@ -114,6 +114,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void connected(String ssid) {
+            Tool.warnOut(TAG,"connected ssid = " + ssid);
             Tool.warnOut(TAG, "已连接");
             textView.setText(R.string.connected);
             String text = getString(R.string.connect_success, ssid);
@@ -132,6 +133,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void disconnected() {
+            Tool.warnOut(TAG,"disconnected");
             Tool.warnOut(TAG, "已断开连接");
         }
 
@@ -142,6 +144,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void authenticating(String ssid) {
+            Tool.warnOut(TAG,"authenticating ssid = " + ssid);
             textView.setText(R.string.authenticating);
         }
 
@@ -152,6 +155,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void obtainingIpAddress(String ssid) {
+            Tool.warnOut(TAG,"obtainingIpAddress ssid = " + ssid);
             textView.setText(R.string.obtaining_ip_address);
         }
 
@@ -162,7 +166,12 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void connectFailed(String ssid) {
+            Tool.warnOut(TAG,"connectFailed ssid = " + ssid);
             textView.setText(R.string.connect_failed);
+            if (alertDialog != null && alertDialog.isShowing()){
+                alertDialog.dismiss();
+                alertDialog = null;
+            }
         }
 
         /**
@@ -170,6 +179,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void disconnecting() {
+            Tool.warnOut(TAG,"disconnecting");
             Tool.warnOut(TAG, "正在断开连接");
         }
 
@@ -394,5 +404,6 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
             return;
         }
         wifiOperatingTools.startConnect(WifiSearchActivity.this, wifiDevice);
+
     }
 }
