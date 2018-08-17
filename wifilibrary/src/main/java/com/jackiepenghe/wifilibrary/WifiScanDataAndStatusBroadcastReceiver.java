@@ -76,6 +76,9 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
     @SuppressWarnings({"JavadocReference", "JavaDoc"})
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (context == null){
+            return;
+        }
         String action = intent.getAction();
         if (action == null) {
             return;
