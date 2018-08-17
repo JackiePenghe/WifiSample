@@ -5,11 +5,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiInfo;
+import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +28,7 @@ import java.util.List;
  *
  * @author jackie
  */
+@SuppressWarnings("unused")
 public class WifiOperatingTools {
 
     /*---------------------------静态常量---------------------------*/
@@ -69,6 +73,10 @@ public class WifiOperatingTools {
      * WiFi连接相关的回调
      */
     private WifiConnectCallback wifiConnectCallback;
+    /**
+     * 获取到WiFi扫描结果的相关回调
+     */
+    private WifiScanResultObtainedListener wifiScanResultObtainedListener;
 
     /*---------------------------构造方法---------------------------*/
 
@@ -80,8 +88,6 @@ public class WifiOperatingTools {
         wifiConnectStatusBroadcastReceiver = new WifiConnectStatusBroadcastReceiver(systemWifiManager);
         wifiScanDataAndStatusBroadcastReceiver = new WifiScanDataAndStatusBroadcastReceiver(systemWifiManager);
         context = WifiManager.getContext();
-        context.registerReceiver(wifiConnectStatusBroadcastReceiver, makeWifiConnectStatusBroadcastReceiverIntentFilter());
-        context.registerReceiver(wifiScanDataAndStatusBroadcastReceiver, makeWifiScanDataAndStatusBroadcastReceiverIntentFilter());
     }
 
     /*---------------------------公开方法---------------------------*/
@@ -224,15 +230,43 @@ public class WifiOperatingTools {
      * @param wifiConnectCallback WiFi连接相关的回调
      */
     public void init(@NonNull WifiScanCallback wifiScanCallback, @NonNull WifiConnectCallback wifiConnectCallback) {
+        context.registerReceiver(wifiConnectStatusBroadcastReceiver, makeWifiConnectStatusBroadcastReceiverIntentFilter());
+        context.registerReceiver(wifiScanDataAndStatusBroadcastReceiver, makeWifiScanDataAndStatusBroadcastReceiverIntentFilter());
         this.wifiScanCallback = wifiScanCallback;
         wifiConnectStatusBroadcastReceiver.setWifiConnectCallback(wifiConnectCallback);
         this.wifiConnectCallback = wifiConnectCallback;
         isInit = true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+    public boolean isScanAlwaysAvailable() {
+        return systemWifiManager.isScanAlwaysAvailable();
+    }
+
+    /**
+     * 手动请求获取WiFi扫描结果
+     */
+    public void requestScanResult() {
+        List<ScanResult> scanResults = systemWifiManager.getScanResults();
+        if (scanResults != null && scanResults.size() > 0) {
+            ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
+            for (int i = 0; i < scanResults.size(); i++) {
+                ScanResult scanResult = scanResults.get(i);
+                WifiDevice wifiDevice = new WifiDevice(context, scanResult);
+                wifiDevices.add(wifiDevice);
+            }
+            if (wifiScanResultObtainedListener != null) {
+                wifiScanResultObtainedListener.wifiScanResultObtained(wifiDevices);
+            }
+        } else {
+            wifiScanResultObtainedListener.wifiScanResultObtained(null);
+        }
+    }
+
     /**
      * 开始扫描
      */
+    @SuppressWarnings("AliDeprecation")
     public void startScan() {
         checkInitStatus();
         if (!WifiManager.isWifiEnabled()) {
@@ -242,13 +276,46 @@ public class WifiOperatingTools {
             WifiManager.enableWifi(true);
             return;
         }
-        boolean result = systemWifiManager.startScan();
-        if (!result) {
-            if (wifiScanCallback != null) {
-                wifiScanCallback.startScanFailed();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            wifiScanCallback.isScanning();
+            List<ScanResult> scanResults = systemWifiManager.getScanResults();
+            if (scanResults != null && scanResults.size() > 0) {
+                ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
+                for (int i = 0; i < scanResults.size(); i++) {
+                    ScanResult scanResult = scanResults.get(i);
+                    WifiDevice wifiDevice = new WifiDevice(context, scanResult);
+                    wifiDevices.add(wifiDevice);
+                }
+                if (wifiScanResultObtainedListener != null) {
+                    wifiScanResultObtainedListener.wifiScanResultObtained(wifiDevices);
+                }
+            } else {
+                wifiScanResultObtainedListener.wifiScanResultObtained(null);
             }
         } else {
-            wifiScanCallback.isScanning();
+            //noinspection AliDeprecation
+            boolean result = systemWifiManager.startScan();
+            if (!result) {
+                if (wifiScanCallback != null) {
+                    wifiScanCallback.startScanFailed();
+                }
+            } else {
+                wifiScanCallback.isScanning();
+                List<ScanResult> scanResults = systemWifiManager.getScanResults();
+                if (scanResults != null && scanResults.size() > 0) {
+                    ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
+                    for (int i = 0; i < scanResults.size(); i++) {
+                        ScanResult scanResult = scanResults.get(i);
+                        WifiDevice wifiDevice = new WifiDevice(context, scanResult);
+                        wifiDevices.add(wifiDevice);
+                    }
+                    if (wifiScanResultObtainedListener != null) {
+                        wifiScanResultObtainedListener.wifiScanResultObtained(wifiDevices);
+                    }
+                } else {
+                    wifiScanResultObtainedListener.wifiScanResultObtained(null);
+                }
+            }
         }
     }
 
@@ -285,6 +352,7 @@ public class WifiOperatingTools {
      */
     public void setWifiScanResultObtainedListener(WifiScanResultObtainedListener wifiScanResultObtainedListener) {
         checkInitStatus();
+        this.wifiScanResultObtainedListener = wifiScanResultObtainedListener;
         if (wifiScanDataAndStatusBroadcastReceiver != null) {
             wifiScanDataAndStatusBroadcastReceiver.setWifiScanResultObtainedListener(wifiScanResultObtainedListener);
         }
@@ -556,6 +624,12 @@ public class WifiOperatingTools {
      */
     private void connect(WifiConfiguration config) {
         int network = systemWifiManager.addNetwork(config);
+        if (network == -1) {
+            if (wifiConnectCallback != null) {
+                wifiConnectCallback.connectFailed(config.SSID);
+            }
+            return;
+        }
         systemWifiManager.enableNetwork(network, true);
     }
 
