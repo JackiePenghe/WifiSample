@@ -551,7 +551,7 @@ public class WifiManager {
      */
     private static void checkInitStatus() {
         if (!isInit) {
-            throw new IllegalStateException("Please invoke method init(...) in your Applications");
+            throw new IllegalStateException("Please invoke method init(...) in your Applications class");
         }
     }
 
