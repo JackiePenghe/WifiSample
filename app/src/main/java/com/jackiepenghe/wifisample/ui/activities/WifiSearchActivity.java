@@ -208,10 +208,14 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     private WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedListener = new WifiOperatingTools.WifiScanResultObtainedListener() {
         @Override
         public void wifiScanResultObtained(ArrayList<WifiDevice> wifiDevices) {
+            if (wifiDevices == null) {
+                return;
+            }
             Tool.warnOut(TAG, "扫描结果已获取");
             Tool.toastL(WifiSearchActivity.this,R.string.search_finished);
             int size = wifiDevices.size();
             if (size == 0) {
+                Tool.warnOut(TAG, "没有搜索到任何WiFi");
                 Tool.toastL(WifiSearchActivity.this, "没有搜索到任何WiFi");
                 return;
             }

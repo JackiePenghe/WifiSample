@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
-import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 
 import com.jackiepenghe.baselibrary.BaseWelcomeActivity;
+import com.jackiepenghe.baselibrary.CrashHandler;
 import com.jackiepenghe.baselibrary.Tool;
 import com.jackiepenghe.wifilibrary.WifiManager;
 import com.jackiepenghe.wifisample.R;
@@ -158,6 +158,7 @@ public class WelcomeActivity extends BaseWelcomeActivity {
      * 跳转到下一个界面
      */
     private void toNext() {
+        CrashHandler.getInstance().init(this);
         Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
         startActivity(intent);
         finish();

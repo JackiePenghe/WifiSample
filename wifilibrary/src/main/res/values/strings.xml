@@ -18,4 +18,5 @@
     <string name="level_4">Weak</string>
     <string name="level_5">Weaker</string>
     <string name="hidden_network">Hidden</string>
+    <string name="search_nothing">Did not get any WiFi hotspot, please confirm that the program is allowed to obtain the location permission and the GPS switch is turned on.</string>
 </resources>

@@ -341,6 +341,31 @@ public class WifiOperatingTools {
                     wifiScanResultObtainedListener.wifiScanResultObtained(null);
                 }
             }
+
+           /* List<ScanResult> scanResults = systemWifiManager.getScanResults();
+            if (scanResults != null && scanResults.size() > 0) {
+                ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
+                for (int i = 0; i < scanResults.size(); i++) {
+                    ScanResult scanResult = scanResults.get(i);
+                    WifiDevice wifiDevice = new WifiDevice(context, scanResult);
+                    wifiDevices.add(wifiDevice);
+                }
+                if (wifiScanResultObtainedListener != null) {
+                    wifiScanResultObtainedListener.wifiScanResultObtained(wifiDevices);
+                }
+                return;
+            }
+            //noinspection AliDeprecation
+            boolean result = systemWifiManager.startScan();
+            if (!result) {
+                if (wifiScanCallback != null) {
+                    wifiScanCallback.startScanFailed();
+                }
+                return;
+            }
+            if (wifiScanCallback != null) {
+                wifiScanCallback.isScanning();
+            }*/
         }
     }
 
@@ -619,9 +644,11 @@ public class WifiOperatingTools {
         config.allowedProtocols.clear();
         config.SSID = "\"" + ssid + "\"";
         if (encryptWay == EncryptWay.NO_ENCRYPT) {
+            //noinspection AliDeprecation
             config.wepKeys[0] = "\"" + "\"";
             config.allowedKeyManagement.set(KeyMgmt.NONE);
             config.hiddenSSID = isHiddenSSID;
+            //noinspection AliDeprecation
             config.wepTxKeyIndex = 0;
         } else if (encryptWay == EncryptWay.WEP_ENCRYPT) {
             config.preSharedKey = "\"" + password + "\"";
@@ -632,6 +659,7 @@ public class WifiOperatingTools {
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
             config.allowedKeyManagement.set(KeyMgmt.NONE);
+            //noinspection AliDeprecation
             config.wepTxKeyIndex = 0;
         } else if (encryptWay == EncryptWay.WPA_ENCRYPT || encryptWay == EncryptWay.WPA_WPA2_ENCRYPT) {
             config.preSharedKey = "\"" + password + "\"";
@@ -639,6 +667,7 @@ public class WifiOperatingTools {
             config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
             config.allowedKeyManagement.set(KeyMgmt.WPA_PSK);
+            //noinspection AliDeprecation
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
@@ -667,7 +696,6 @@ public class WifiOperatingTools {
         final EditText editText = (EditText) View.inflate(activity, R.layout.com_jackiepenghe_edit_text, null);
         new AlertDialog.Builder(activity)
                 .setTitle(R.string.input_wifi_password)
-                .setIcon(android.R.drawable.ic_dialog_info)
                 .setView(editText)
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override

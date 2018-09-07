@@ -14,14 +14,35 @@ import android.support.v7.app.AlertDialog;
 
 import com.jackiepenghe.wifilibrary.WifiDevice.EncryptWay;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+
 /**
  * @author jackie
  */
+@SuppressWarnings("WeakerAccess")
 public class WifiManager {
 
     /*---------------------------静态常量---------------------------*/
 
     static final int REQUEST_CODE_WRITE_SETTINGS = 10;
+
+    /**
+     * 线程工厂
+     */
+    private static final ThreadFactory THREAD_FACTORY = new ThreadFactory() {
+        @Override
+        public Thread newThread(@NonNull Runnable r) {
+            return new Thread(r);
+        }
+    };
+
+
+    /**
+     * 定时任务执行服务
+     */
+    private static final ScheduledExecutorService SCHEDULED_THREAD_POOL_EXECUTOR = new ScheduledThreadPoolExecutor(1, THREAD_FACTORY);
 
     /*---------------------------静态成员变量---------------------------*/
 
@@ -461,6 +482,28 @@ public class WifiManager {
         return ssid1.equals(doubleQuotes + ssid2 + doubleQuotes) || ssid1.equals(ssid2) || ssid2.equals(doubleQuotes + ssid1 + doubleQuotes);
     }
 
+    public static ScheduledExecutorService newScheduledExecutorService() {
+        return new ScheduledThreadPoolExecutor(1, newThreadFactory());
+    }
+
+    public static ThreadFactory newThreadFactory() {
+        return new ThreadFactory() {
+            @Override
+            public Thread newThread(@NonNull Runnable r) {
+                return new Thread(r);
+            }
+        };
+    }
+
+    public static ScheduledExecutorService getScheduledExecutorServiceInstance() {
+        return SCHEDULED_THREAD_POOL_EXECUTOR;
+    }
+
+    public static ThreadFactory getThreadFactoryInstance() {
+        return THREAD_FACTORY;
+    }
+
+
     /*---------------------------接口定义---------------------------*/
 
     /**
@@ -514,6 +557,7 @@ public class WifiManager {
          * @param wifiState WiFi状态
          */
         void unknownWifiState(int wifiState);
+
     }
 
     /*---------------------------私有方法---------------------------*/

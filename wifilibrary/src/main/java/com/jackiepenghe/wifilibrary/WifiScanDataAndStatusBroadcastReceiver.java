@@ -90,7 +90,10 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
 
                 List<ScanResult> scanResults = systemWifiManager.getScanResults();
                 int size = scanResults.size();
-
+                if (size == 0) {
+                    Tool.toastL(context, R.string.search_nothing);
+                    return;
+                }
                 // 每次最大元素就像气泡一样"浮"到数组的最后
                 for (int j = 0; j < size - 1; j++) {
                     // 依次比较相邻的两个元素,使较小的那个向后移

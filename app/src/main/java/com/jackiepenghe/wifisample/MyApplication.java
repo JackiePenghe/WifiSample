@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
+import com.jackiepenghe.baselibrary.FileUtil;
 import com.jackiepenghe.baselibrary.Tool;
 import com.jackiepenghe.wifilibrary.WifiManager;
 
@@ -23,6 +24,8 @@ public class MyApplication extends Application {
         WifiManager.init(this);
         WifiManager.setDebugFlag(true);
         Tool.setDebugFlag(true);
+        FileUtil.init(this);
+
     }
 
     @Override

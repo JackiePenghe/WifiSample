@@ -18,4 +18,5 @@
     <string name="level_4">弱</string>
     <string name="level_5">很弱</string>
     <string name="hidden_network">隐藏网络</string>
+    <string name="search_nothing">未获取到任何WiFi热点，请确认允已经许程序获取定位权限且打开了GPS定位开关</string>
 </resources>
