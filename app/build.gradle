@@ -6,8 +6,8 @@ android {
         applicationId "com.jackiepenghe.wifisample"
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 21
-        versionName "0.2.1"
+        versionCode 22
+        versionName "0.2.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -27,18 +27,18 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
     //V7包
-    implementation 'com.android.support:appcompat-v7:28.0.0-rc02'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     //WiFi库的Module
     implementation project(':wifilibrary')
     //常用基础库
-    implementation 'com.jackiepenghe:baselibrary:0.9.0'
+    implementation 'com.jackiepenghe:baselibrary:0.9.7'
     //动态权限库
     //noinspection GradleDependency
-    implementation 'com.yanzhenjie:permission:2.0.0-rc11'
+    implementation 'com.yanzhenjie:permission:2.0.0-rc12'
     //design包
-    implementation 'com.android.support:design:28.0.0-rc01'
+    implementation 'com.android.support:design:28.0.0'
     //recyclerView适配器
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.30'
     //多分包支持库

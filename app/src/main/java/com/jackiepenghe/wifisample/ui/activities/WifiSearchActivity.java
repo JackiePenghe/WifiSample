@@ -59,7 +59,6 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      * 适配器的数据源
      */
     private List<WifiDevice> adapterList = new ArrayList<>();
-//    private List<ScanResult> adapterList = new ArrayList<>();
 
     /**
      * 适配器

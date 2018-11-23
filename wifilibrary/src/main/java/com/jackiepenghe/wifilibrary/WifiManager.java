@@ -495,14 +495,6 @@ public class WifiManager {
         };
     }
 
-    public static ScheduledExecutorService getScheduledExecutorServiceInstance() {
-        return SCHEDULED_THREAD_POOL_EXECUTOR;
-    }
-
-    public static ThreadFactory getThreadFactoryInstance() {
-        return THREAD_FACTORY;
-    }
-
 
     /*---------------------------接口定义---------------------------*/
 

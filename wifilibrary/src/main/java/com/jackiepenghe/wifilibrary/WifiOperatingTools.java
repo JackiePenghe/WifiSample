@@ -133,6 +133,7 @@ public class WifiOperatingTools {
             }
             return;
         }
+        systemWifiManager.disconnect();
         int netId = isExists(wifiDevice.getSSID());
         if (-1 != netId) {
             boolean enableNetwork = systemWifiManager.enableNetwork(netId, true);
@@ -318,8 +319,7 @@ public class WifiOperatingTools {
                 wifiScanResultObtainedListener.wifiScanResultObtained(null);
             }
         } else {
-            //noinspection AliDeprecation
-            boolean result = systemWifiManager.startScan();
+            @SuppressWarnings("AliDeprecation") boolean result = systemWifiManager.startScan();
             if (!result) {
                 if (wifiScanCallback != null) {
                     wifiScanCallback.startScanFailed();
