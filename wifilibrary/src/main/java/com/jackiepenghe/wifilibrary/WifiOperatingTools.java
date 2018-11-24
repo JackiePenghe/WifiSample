@@ -1,7 +1,6 @@
 package com.jackiepenghe.wifilibrary;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
@@ -12,6 +11,7 @@ import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -120,10 +120,10 @@ public class WifiOperatingTools {
     /**
      * 发起连接
      *
-     * @param activity   Activity
+     * @param context   上下文
      * @param wifiDevice 扫描设备
      */
-    public void startConnect(Activity activity, WifiDevice wifiDevice) {
+    public void startConnect(Context context, WifiDevice wifiDevice) {
         checkInitStatus();
         String connectedWifiSSID = WifiManager.getConnectedWifiSSID();
 
@@ -154,12 +154,12 @@ public class WifiOperatingTools {
         if (encryptWay != EncryptWay.NO_ENCRYPT) {
             //连接WiFi
             if (!wifiDevice.isHidden()) {
-                showConnectWifiWithPassWord(activity, wifiDevice);
+                showConnectWifiWithPassWord(context, wifiDevice);
             }
             //连接隐藏的WiFi
             else {
                 Tool.warnOut(TAG, "连接隐藏WiFi");
-                showConnectWifiWithNameAndPassWord(activity, encryptWay);
+                showConnectWifiWithNameAndPassWord(context, encryptWay);
             }
         } else {
             WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), "", encryptWay, false);
@@ -170,12 +170,12 @@ public class WifiOperatingTools {
     /**
      * 显示连接隐藏WiFi
      *
-     * @param activity      Activity
+     * @param context      上下文
      * @param encryptionWay 加密方式
      */
-    private void showConnectWifiWithNameAndPassWord(Activity activity, final EncryptWay encryptionWay) {
-        final View view = View.inflate(context, R.layout.com_jackiepenghe_hidden_wifi_dialog, null);
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+    private void showConnectWifiWithNameAndPassWord(Context context, final EncryptWay encryptionWay) {
+        final View view = View.inflate(this.context, R.layout.com_jackiepenghe_hidden_wifi_dialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(R.string.input_wifi_name_and_password)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setView(view)
@@ -188,13 +188,13 @@ public class WifiOperatingTools {
                         String wifiName = wifiNameEt.getText().toString();
 
                         if ("".equals(wifiName)) {
-                            Tool.toastL(context, R.string.wifi_name_null);
+                            Tool.toastL(WifiOperatingTools.this.context, R.string.wifi_name_null);
                             return;
                         }
 
                         String wifiPassword = wifiPasswordEt.getText().toString();
                         if ("".equals(wifiPassword) || wifiPassword.length() < WIFI_PASSWORD_MIN_LENGTH) {
-                            Tool.toastL(context, R.string.wifi_password_null);
+                            Tool.toastL(WifiOperatingTools.this.context, R.string.wifi_password_null);
                             return;
                         }
                         WifiConfiguration wifiConfiguration = createWifiInfo(wifiName, wifiPassword, encryptionWay, true);
@@ -208,7 +208,7 @@ public class WifiOperatingTools {
                             HANDLER.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    wifiConnectCallback.cancelConnect(context.getString(R.string.hidden_network));
+                                    wifiConnectCallback.cancelConnect(WifiOperatingTools.this.context.getString(R.string.hidden_network));
                                 }
                             });
                         }
@@ -292,7 +292,6 @@ public class WifiOperatingTools {
     /**
      * 开始扫描
      */
-    @SuppressWarnings("AliDeprecation")
     public void startScan() {
         checkInitStatus();
         if (!WifiManager.isWifiEnabled()) {
@@ -319,7 +318,7 @@ public class WifiOperatingTools {
                 wifiScanResultObtainedListener.wifiScanResultObtained(null);
             }
         } else {
-            @SuppressWarnings("AliDeprecation") boolean result = systemWifiManager.startScan();
+            boolean result = systemWifiManager.startScan();
             if (!result) {
                 if (wifiScanCallback != null) {
                     wifiScanCallback.startScanFailed();
@@ -341,31 +340,6 @@ public class WifiOperatingTools {
                     wifiScanResultObtainedListener.wifiScanResultObtained(null);
                 }
             }
-
-           /* List<ScanResult> scanResults = systemWifiManager.getScanResults();
-            if (scanResults != null && scanResults.size() > 0) {
-                ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
-                for (int i = 0; i < scanResults.size(); i++) {
-                    ScanResult scanResult = scanResults.get(i);
-                    WifiDevice wifiDevice = new WifiDevice(context, scanResult);
-                    wifiDevices.add(wifiDevice);
-                }
-                if (wifiScanResultObtainedListener != null) {
-                    wifiScanResultObtainedListener.wifiScanResultObtained(wifiDevices);
-                }
-                return;
-            }
-            //noinspection AliDeprecation
-            boolean result = systemWifiManager.startScan();
-            if (!result) {
-                if (wifiScanCallback != null) {
-                    wifiScanCallback.startScanFailed();
-                }
-                return;
-            }
-            if (wifiScanCallback != null) {
-                wifiScanCallback.isScanning();
-            }*/
         }
     }
 
@@ -489,7 +463,7 @@ public class WifiOperatingTools {
          *
          * @param wifiDevices WiFi扫描的结果
          */
-        void wifiScanResultObtained(ArrayList<WifiDevice> wifiDevices);
+        void wifiScanResultObtained(@Nullable ArrayList<WifiDevice> wifiDevices);
     }
 
     /**
@@ -689,12 +663,12 @@ public class WifiOperatingTools {
     /**
      * 连接指定的WiFi网络
      *
-     * @param activity   Activity
+     * @param context   上下文
      * @param wifiDevice 扫描结果
      */
-    private void showConnectWifiWithPassWord(final Activity activity, final WifiDevice wifiDevice) {
-        final EditText editText = (EditText) View.inflate(activity, R.layout.com_jackiepenghe_edit_text, null);
-        new AlertDialog.Builder(activity)
+    private void showConnectWifiWithPassWord(final Context context, final WifiDevice wifiDevice) {
+        final EditText editText = (EditText) View.inflate(context, R.layout.com_jackiepenghe_edit_text, null);
+        new AlertDialog.Builder(context)
                 .setTitle(R.string.input_wifi_password)
                 .setView(editText)
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
@@ -703,8 +677,8 @@ public class WifiOperatingTools {
                         String password = editText.getText().toString();
                         Log.w(TAG, "editText.getText():" + password);
                         if ("".equals(password) || password.length() < WIFI_PASSWORD_MIN_LENGTH) {
-                            Tool.toastL(context, R.string.wifi_password_null);
-                            showConnectWifiWithPassWord(activity, wifiDevice);
+                            Tool.toastL(WifiOperatingTools.this.context, R.string.wifi_password_null);
+                            showConnectWifiWithPassWord(context, wifiDevice);
                             return;
                         }
                         WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), password, wifiDevice.getEncryptWay(), false);
