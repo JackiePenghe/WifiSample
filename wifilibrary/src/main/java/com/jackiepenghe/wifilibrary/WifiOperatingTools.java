@@ -120,15 +120,100 @@ public class WifiOperatingTools {
     /**
      * 发起连接
      *
-     * @param context   上下文
-     * @param wifiDevice 扫描设备
+     * @param context  上下文
+     * @param wifiDevice WiFi设备
      */
     public void startConnect(Context context, WifiDevice wifiDevice) {
+        startConnect(context, wifiDevice, null);
+    }
+
+    /**
+     * 发起连接
+     *
+     * @param context  上下文
+     * @param wifiSSid WiFi名
+     */
+    public void startConnect(Context context, String wifiSSid) {
+        startConnect(context, wifiSSid, null);
+    }
+
+    /**
+     * 发起连接
+     *
+     * @param context  上下文
+     * @param wifiSSid WiFi名
+     * @param password WiFi密码
+     */
+    @SuppressWarnings("WeakerAccess")
+    public void startConnect(Context context, String wifiSSid, String password) {
+        startConnect(context, wifiSSid, password, 0);
+    }
+
+
+    /**
+     * 发起连接
+     *
+     * @param context    上下文
+     * @param wifiDevice 扫描设备
+     */
+    @SuppressWarnings("WeakerAccess")
+    public void startConnect(Context context, WifiDevice wifiDevice, String password) {
+        if (password == null) {
+            connectWifiDeviceWithoutPassword(context, wifiDevice);
+        } else {
+            connectWifiDeviceWithPassword(context, wifiDevice, password);
+        }
+    }
+
+    private void connectWifiDeviceWithPassword(Context context, WifiDevice wifiDevice, String password) {
         checkInitStatus();
         String connectedWifiSSID = WifiManager.getConnectedWifiSSID();
+        if (connectedWifiSSID != null && WifiManager.isWifiSsidEquals(connectedWifiSSID, wifiDevice.getSSID())) {
+            if (wifiConnectCallback != null) {
+                wifiConnectCallback.connected(wifiDevice.getSSID());
+            }
+            return;
+        }
+        systemWifiManager.disconnect();
+        int netId = isExists(wifiDevice.getSSID());
+        if (-1 != netId) {
+            boolean enableNetwork = systemWifiManager.enableNetwork(netId, true);
+            if (enableNetwork) {
+                if (wifiConnectCallback != null) {
+                    wifiConnectCallback.connecting(wifiDevice.getSSID());
+                }
+            } else {
+                if (wifiConnectCallback != null) {
+                    wifiConnectCallback.connectFailed(wifiDevice.getSSID());
+                }
+            }
+            return;
+        }
 
-        if (connectedWifiSSID != null && WifiManager.isWifiSsidEquals(connectedWifiSSID,wifiDevice.getSSID())){
-            if (wifiConnectCallback != null){
+        EncryptWay encryptWay = wifiDevice.getEncryptWay();
+        //不需要密码
+        if (encryptWay != EncryptWay.NO_ENCRYPT) {
+            //连接WiFi
+            if (!wifiDevice.isHidden()) {
+                WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), password, wifiDevice.getEncryptWay(), false);
+                connect(wifiConfiguration);
+            }
+            //连接隐藏的WiFi
+            else {
+                Tool.warnOut(TAG, "连接隐藏WiFi");
+                showConnectWifiWithNameAndPassWord(context, encryptWay);
+            }
+        } else {
+            WifiConfiguration wifiConfiguration = createWifiInfo(wifiDevice.getSSID(), password, encryptWay, false);
+            connect(wifiConfiguration);
+        }
+    }
+
+    private void connectWifiDeviceWithoutPassword(Context context, WifiDevice wifiDevice) {
+        checkInitStatus();
+        String connectedWifiSSID = WifiManager.getConnectedWifiSSID();
+        if (connectedWifiSSID != null && WifiManager.isWifiSsidEquals(connectedWifiSSID, wifiDevice.getSSID())) {
+            if (wifiConnectCallback != null) {
                 wifiConnectCallback.connected(wifiDevice.getSSID());
             }
             return;
@@ -170,7 +255,7 @@ public class WifiOperatingTools {
     /**
      * 显示连接隐藏WiFi
      *
-     * @param context      上下文
+     * @param context       上下文
      * @param encryptionWay 加密方式
      */
     private void showConnectWifiWithNameAndPassWord(Context context, final EncryptWay encryptionWay) {
@@ -663,7 +748,7 @@ public class WifiOperatingTools {
     /**
      * 连接指定的WiFi网络
      *
-     * @param context   上下文
+     * @param context    上下文
      * @param wifiDevice 扫描结果
      */
     private void showConnectWifiWithPassWord(final Context context, final WifiDevice wifiDevice) {
@@ -716,11 +801,11 @@ public class WifiOperatingTools {
             return;
         }
         boolean enableNetwork = systemWifiManager.enableNetwork(network, true);
-        if (enableNetwork){
+        if (enableNetwork) {
             if (wifiConnectCallback != null) {
                 wifiConnectCallback.connecting(config.SSID);
             }
-        }else {
+        } else {
             if (wifiConnectCallback != null) {
                 wifiConnectCallback.connectFailed(config.SSID);
             }
@@ -750,5 +835,26 @@ public class WifiOperatingTools {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(android.net.wifi.WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         return intentFilter;
+    }
+
+    private void startConnect(Context context, String wifiSSid, String password, int tryCount) {
+        tryCount++;
+        List<ScanResult> scanResults = systemWifiManager.getScanResults();
+        WifiDevice wifiDevice = null;
+        for (int i = 0; i < scanResults.size(); i++) {
+            ScanResult scanResult = scanResults.get(i);
+            if (WifiManager.isWifiSsidEquals(scanResult.SSID, wifiSSid)) {
+                wifiDevice = new WifiDevice(context, scanResult);
+                break;
+            }
+        }
+        if (wifiDevice == null) {
+            if (tryCount > 3) {
+                return;
+            }
+            startConnect(context, wifiSSid, password, tryCount);
+            return;
+        }
+        startConnect(context, wifiDevice, password);
     }
 }
