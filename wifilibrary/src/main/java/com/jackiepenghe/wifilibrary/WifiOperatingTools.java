@@ -92,6 +92,24 @@ public class WifiOperatingTools {
 
     /*---------------------------公开方法---------------------------*/
 
+    public boolean removeWifiInfo(WifiInfo wifiInfo) {
+        return removeWifiInfo(wifiInfo.getSSID());
+    }
+
+    public boolean removeWifiInfo(WifiDevice wifiDevice) {
+        return removeWifiInfo(wifiDevice.getSSID());
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public boolean removeWifiInfo(String wifiSsid) {
+        int netId = isExists(wifiSsid);
+        if (-1 != netId) {
+            systemWifiManager.removeNetwork(netId);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 发起连接
      *
@@ -120,7 +138,7 @@ public class WifiOperatingTools {
     /**
      * 发起连接
      *
-     * @param context  上下文
+     * @param context    上下文
      * @param wifiDevice WiFi设备
      */
     public void startConnect(Context context, WifiDevice wifiDevice) {
