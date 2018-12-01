@@ -76,7 +76,7 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
     @SuppressWarnings({"JavadocReference", "JavaDoc"})
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (context == null){
+        if (context == null) {
             return;
         }
         String action = intent.getAction();
@@ -125,9 +125,9 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
                     String ssid = scanResult.SSID;
                     if (ssid == null || "".equals(ssid)) {
                         scanResult.SSID = context.getString(R.string.hidden_network);
-                        wifiDevice = new WifiDevice(context, scanResult, true);
-                    }else {
-                        wifiDevice = new WifiDevice(context, scanResult);
+                        wifiDevice = new WifiDevice(scanResult, true);
+                    } else {
+                        wifiDevice = new WifiDevice(scanResult);
 
                     }
                     wifiDevices.add(wifiDevice);

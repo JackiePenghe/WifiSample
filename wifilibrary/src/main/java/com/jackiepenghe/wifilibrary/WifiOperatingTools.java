@@ -381,7 +381,7 @@ public class WifiOperatingTools {
             ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
             for (int i = 0; i < scanResults.size(); i++) {
                 ScanResult scanResult = scanResults.get(i);
-                WifiDevice wifiDevice = new WifiDevice(context, scanResult);
+                WifiDevice wifiDevice = new WifiDevice( scanResult);
                 wifiDevices.add(wifiDevice);
             }
             if (wifiScanResultObtainedListener != null) {
@@ -411,7 +411,7 @@ public class WifiOperatingTools {
                 ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
                 for (int i = 0; i < scanResults.size(); i++) {
                     ScanResult scanResult = scanResults.get(i);
-                    WifiDevice wifiDevice = new WifiDevice(context, scanResult);
+                    WifiDevice wifiDevice = new WifiDevice( scanResult);
                     wifiDevices.add(wifiDevice);
                 }
                 if (wifiScanResultObtainedListener != null) {
@@ -433,7 +433,7 @@ public class WifiOperatingTools {
                     ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
                     for (int i = 0; i < scanResults.size(); i++) {
                         ScanResult scanResult = scanResults.get(i);
-                        WifiDevice wifiDevice = new WifiDevice(context, scanResult);
+                        WifiDevice wifiDevice = new WifiDevice( scanResult);
                         wifiDevices.add(wifiDevice);
                     }
                     if (wifiScanResultObtainedListener != null) {
@@ -862,7 +862,7 @@ public class WifiOperatingTools {
         for (int i = 0; i < scanResults.size(); i++) {
             ScanResult scanResult = scanResults.get(i);
             if (WifiManager.isWifiSsidEquals(scanResult.SSID, wifiSSid)) {
-                wifiDevice = new WifiDevice(context, scanResult);
+                wifiDevice = new WifiDevice( scanResult);
                 break;
             }
         }

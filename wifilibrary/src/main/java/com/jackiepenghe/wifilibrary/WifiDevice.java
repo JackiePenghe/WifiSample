@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.RequiresApi;
 
 /**
@@ -11,7 +13,8 @@ import android.support.annotation.RequiresApi;
  *
  * @author jackie
  */
-public class WifiDevice {
+public class WifiDevice implements Parcelable {
+
 
     /*---------------------------静态常量---------------------------*/
 
@@ -28,36 +31,29 @@ public class WifiDevice {
     private ScanResult scanResult;
 
     /**
-     * 上下文
-     */
-    private Context context;
-
-    /**
      * 是否是隐藏WiFi
      */
     private boolean hidden;
+
     /*---------------------------构造方法---------------------------*/
 
     /**
      * 构造方法
      *
-     * @param context 上下文
      * @param scanResult WiFi设备扫描结果
      */
-    WifiDevice(Context context, ScanResult scanResult) {
-      this(context,scanResult,false);
+    WifiDevice( ScanResult scanResult) {
+      this(scanResult,false);
     }
 
     /**
      * 构造方法
-     * @param context 上下文
      * @param scanResult WiFi设备扫描结果
      * @param hidden 是否是隐藏WiFi
      */
     @SuppressWarnings("WeakerAccess")
-    public WifiDevice(Context context, ScanResult scanResult, boolean hidden) {
+    public WifiDevice(ScanResult scanResult, boolean hidden) {
         this.scanResult = scanResult;
-        this.context = context;
         this.hidden = hidden;
     }
 
@@ -154,6 +150,7 @@ public class WifiDevice {
         return "\"" +  scanResult.SSID + "\"";
     }
 
+    @SuppressWarnings({"WeakerAccess", "BooleanMethodIsAlwaysInverted"})
     public boolean isHidden() {
         return hidden;
     }
@@ -219,7 +216,7 @@ public class WifiDevice {
         return scanResult.level;
     }
 
-    public String getStringLevel() {
+    public String getStringLevel(Context context) {
         int level = scanResult.level;
         if (level >= LEVEL_1) {
             return context.getString(R.string.level_1);
@@ -249,7 +246,37 @@ public class WifiDevice {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     public EncryptWay getEncryptWay(){
         return WifiManager.getEncryptionWay(scanResult);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(this.scanResult, flags);
+        dest.writeByte(this.hidden ? (byte) 1 : (byte) 0);
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    protected WifiDevice(Parcel in) {
+        this.scanResult = in.readParcelable(ScanResult.class.getClassLoader());
+        this.hidden = in.readByte() != 0;
+    }
+
+    public static final Parcelable.Creator<WifiDevice> CREATOR = new Parcelable.Creator<WifiDevice>() {
+        @Override
+        public WifiDevice createFromParcel(Parcel source) {
+            return new WifiDevice(source);
+        }
+
+        @Override
+        public WifiDevice[] newArray(int size) {
+            return new WifiDevice[size];
+        }
+    };
 }

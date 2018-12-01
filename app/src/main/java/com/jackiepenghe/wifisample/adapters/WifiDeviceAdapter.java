@@ -37,6 +37,6 @@ public class WifiDeviceAdapter extends BaseQuickAdapter<WifiDevice, BaseViewHold
         helper.setImageResource(R.id.signal, item.getLevelDrawableResId())
                 .setText(R.id.text1, item.getSSID())
                 .setText(R.id.text2, encryptionWay)
-                .setText(R.id.level, item.getStringLevel() + "(" + item.getIntLevel() + ")");
+                .setText(R.id.level, item.getStringLevel(mContext) + "(" + item.getIntLevel() + ")");
     }
 }

@@ -1,6 +1,8 @@
 package com.jackiepenghe.wifisample.ui.activities;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.os.Parcelable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,6 +23,7 @@ import com.jackiepenghe.wifilibrary.WifiOperatingTools;
 import com.jackiepenghe.wifisample.R;
 import com.jackiepenghe.wifisample.adapters.WifiDeviceAdapter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +96,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void connecting(String ssid) {
-            Tool.warnOut(TAG,"connecting ssid = " + ssid);
+            Tool.warnOut(TAG, "connecting ssid = " + ssid);
             if (alertDialog != null) {
                 return;
             }
@@ -113,7 +116,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void connected(String ssid) {
-            Tool.warnOut(TAG,"connected ssid = " + ssid);
+            Tool.warnOut(TAG, "connected ssid = " + ssid);
             Tool.warnOut(TAG, "已连接");
             textView.setText(R.string.connected);
             String text = getString(R.string.connect_success, ssid);
@@ -132,7 +135,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void disconnected() {
-            Tool.warnOut(TAG,"disconnected");
+            Tool.warnOut(TAG, "disconnected");
             Tool.warnOut(TAG, "已断开连接");
         }
 
@@ -143,7 +146,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void authenticating(String ssid) {
-            Tool.warnOut(TAG,"authenticating ssid = " + ssid);
+            Tool.warnOut(TAG, "authenticating ssid = " + ssid);
             textView.setText(R.string.authenticating);
         }
 
@@ -154,7 +157,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void obtainingIpAddress(String ssid) {
-            Tool.warnOut(TAG,"obtainingIpAddress ssid = " + ssid);
+            Tool.warnOut(TAG, "obtainingIpAddress ssid = " + ssid);
             textView.setText(R.string.obtaining_ip_address);
         }
 
@@ -165,9 +168,9 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void connectFailed(String ssid) {
-            Tool.warnOut(TAG,"connectFailed ssid = " + ssid);
+            Tool.warnOut(TAG, "connectFailed ssid = " + ssid);
             textView.setText(R.string.connect_failed);
-            if (alertDialog != null && alertDialog.isShowing()){
+            if (alertDialog != null && alertDialog.isShowing()) {
                 alertDialog.dismiss();
                 alertDialog = null;
             }
@@ -178,7 +181,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
          */
         @Override
         public void disconnecting() {
-            Tool.warnOut(TAG,"disconnecting");
+            Tool.warnOut(TAG, "disconnecting");
             Tool.warnOut(TAG, "正在断开连接");
         }
 
@@ -211,7 +214,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
                 return;
             }
             Tool.warnOut(TAG, "扫描结果已获取");
-            Tool.toastL(WifiSearchActivity.this,R.string.search_finished);
+            Tool.toastL(WifiSearchActivity.this, R.string.search_finished);
             int size = wifiDevices.size();
             if (size == 0) {
                 Tool.warnOut(TAG, "没有搜索到任何WiFi");
@@ -221,7 +224,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
 
             for (int i = 0; i < size; i++) {
                 WifiDevice wifiDevice = wifiDevices.get(i);
-                String ssid =  wifiDevice.getSSID();
+                String ssid = wifiDevice.getSSID();
                 int level = wifiDevice.getIntLevel();
                 Tool.warnOut(TAG, "设备 " + (i + 1) + " :ssid = " + ssid + ",level = " + level);
             }
@@ -250,7 +253,11 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     private BaseQuickAdapter.OnItemClickListener onItemClickListener = new BaseQuickAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-            startConnect(adapterList.get(position));
+            WifiDevice wifiDevice = adapterList.get(position);
+            Intent intent = new Intent(WifiSearchActivity.this, WifiSearchActivity.class);
+            intent.putExtra("AAAA", wifiDevice);
+            startActivity(intent);
+            startConnect(wifiDevice);
         }
     };
 
