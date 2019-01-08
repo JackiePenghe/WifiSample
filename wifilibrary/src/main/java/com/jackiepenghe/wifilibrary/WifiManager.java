@@ -3,16 +3,18 @@ package com.jackiepenghe.wifilibrary;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 
-import com.jackiepenghe.wifilibrary.WifiDevice.EncryptWay;
+import com.jackiepenghe.wifilibrary.enums.EncryptWay;
+import com.jackiepenghe.wifilibrary.intefaces.OnWifiStateChangedListener;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -26,8 +28,6 @@ public class WifiManager {
 
     /*---------------------------静态常量---------------------------*/
 
-    static final int REQUEST_CODE_WRITE_SETTINGS = 10;
-
     /**
      * 线程工厂
      */
@@ -38,11 +38,10 @@ public class WifiManager {
         }
     };
 
-
     /**
-     * 定时任务执行服务
+     * Handler
      */
-    private static final ScheduledExecutorService SCHEDULED_THREAD_POOL_EXECUTOR = new ScheduledThreadPoolExecutor(1, THREAD_FACTORY);
+    private static final Handler HANDLER = new Handler();
 
     /*---------------------------静态成员变量---------------------------*/
 
@@ -51,6 +50,14 @@ public class WifiManager {
      */
     private static android.net.wifi.WifiManager systemWifiManager;
     /**
+     * Wifi scanner
+     */
+    private static WifiScanner wifiScanner;
+    /**
+     * wifi connector
+     */
+    private static WifiConnector wifiConnector;
+    /**
      * 记录是否已经初始化
      */
     private static boolean isInit;
@@ -58,11 +65,6 @@ public class WifiManager {
      * WiFi热点创建器
      */
     private static WifiHotspotController wifiHotspotController;
-    /**
-     * WiFi扫描器
-     */
-    @SuppressLint("StaticFieldLeak")
-    private static WifiOperatingTools wifiOperatingTools;
     /**
      * 上下文
      */
@@ -87,15 +89,15 @@ public class WifiManager {
     /**
      * 初始化
      *
-     * @param context                  上下文
-     * @param wifiStateChangedListener WiFi状态被改变时进行的回调
+     * @param context                    上下文
+     * @param onWifiStateChangedListener WiFi状态被改变时进行的回调
      */
     @SuppressWarnings("WeakerAccess")
-    public static void init(@NonNull Context context, WifiStateChangedListener wifiStateChangedListener) {
+    public static void init(@NonNull Context context, OnWifiStateChangedListener onWifiStateChangedListener) {
         initWifiManager(context.getApplicationContext());
         WifiManager.context = context.getApplicationContext();
         wifiStatusBroadcastReceiver = new WifiStatusBroadcastReceiver();
-        wifiStatusBroadcastReceiver.setWifiStateChangedListener(wifiStateChangedListener);
+        wifiStatusBroadcastReceiver.setWifiStateChangedListener(onWifiStateChangedListener);
         context.getApplicationContext().registerReceiver(wifiStatusBroadcastReceiver, makeIntentFilter());
         isInit = true;
     }
@@ -128,6 +130,40 @@ public class WifiManager {
         return new WifiHotspotController();
     }
 
+    public static WifiScanner getWifiScannerInstance() {
+        checkInitStatus();
+        if (wifiScanner == null) {
+            synchronized (WifiManager.class) {
+                if (wifiScanner == null) {
+                    wifiScanner = new WifiScanner();
+                }
+            }
+        }
+        return wifiScanner;
+    }
+
+    public static WifiScanner newWifiScannerInstance() {
+        checkInitStatus();
+        return new WifiScanner();
+    }
+
+    public static WifiConnector getWifiConnectorInstance() {
+        checkInitStatus();
+        if (wifiConnector == null) {
+            synchronized (WifiManager.class) {
+                if (wifiConnector == null) {
+                    wifiConnector = new WifiConnector();
+                }
+            }
+        }
+        return wifiConnector;
+    }
+
+    public static WifiConnector newWifiConnectorInstance() {
+        checkInitStatus();
+        return new WifiConnector();
+    }
+
     /**
      * 释放Wifi热点创建器
      */
@@ -143,18 +179,15 @@ public class WifiManager {
     }
 
     /**
-     * 获取WiFi扫描器单例
+     * 释放Wifi热点创建器
      */
-    public static WifiOperatingTools getWifiOperatingToolsInstance() {
+    public static void releaseWifiConnector() {
         checkInitStatus();
-        if (wifiOperatingTools == null) {
-            synchronized (WifiManager.class) {
-                if (wifiOperatingTools == null) {
-                    wifiOperatingTools = new WifiOperatingTools();
-                }
-            }
+        if (wifiConnector != null) {
+            wifiConnector.removeAllOnWifiConnectStateChangedListener();
+            wifiConnector.close();
+            wifiConnector = null;
         }
-        return wifiOperatingTools;
     }
 
     /**
@@ -168,32 +201,11 @@ public class WifiManager {
     }
 
     /**
-     * 获取WiFi扫描器单例
-     */
-    @Deprecated
-    public static WifiOperatingTools newWifiOperatingToolsInstance() {
-        checkInitStatus();
-        return new WifiOperatingTools();
-    }
-
-    /**
-     * 释放WiFi扫描器的资源
-     */
-    public static void releaseWifiOperatingTools() {
-        checkInitStatus();
-        if (wifiOperatingTools != null) {
-            wifiOperatingTools.close();
-            wifiOperatingTools = null;
-        }
-    }
-
-    /**
      * 释放全部内存
      */
     public static void releaseAll() {
         checkInitStatus();
         releaseWifiHotspotCreator();
-        releaseWifiOperatingTools();
         try {
             context.unregisterReceiver(wifiStatusBroadcastReceiver);
         } catch (Exception e) {
@@ -227,7 +239,7 @@ public class WifiManager {
      */
     public static void setDebugFlag(boolean debugFlag) {
         checkInitStatus();
-        Tool.setDebugFlag(debugFlag);
+        DebugUtil.setDebugFlag(debugFlag);
     }
 
     /**
@@ -256,7 +268,7 @@ public class WifiManager {
      */
     public static void requestSystemSettingsPermissionRational(Activity activity, RequestPermissionResult requestPermissionResult) {
         checkInitStatus();
-        showNoWriteSettingsPermissionDialog(activity, requestPermissionResult);
+//        showNoWriteSettingsPermissionDialog(activity, requestPermissionResult);
     }
 
     /**
@@ -288,7 +300,7 @@ public class WifiManager {
      * @param wifiStateChangedListener WiFi状态改变时调用此接口
      */
     @SuppressWarnings("unused")
-    public static void setWifiStateChangedListener(com.jackiepenghe.wifilibrary.WifiManager.WifiStateChangedListener wifiStateChangedListener) {
+    public static void setWifiStateChangedListener(OnWifiStateChangedListener wifiStateChangedListener) {
         checkInitStatus();
         WifiManager.wifiStatusBroadcastReceiver.setWifiStateChangedListener(wifiStateChangedListener);
     }
@@ -495,6 +507,20 @@ public class WifiManager {
         };
     }
 
+    public static Handler getHANDLER() {
+        return HANDLER;
+    }
+
+    public static ThreadFactory getThreadFactory() {
+        return THREAD_FACTORY;
+    }
+
+    public static void releaseWifiScanner() {
+        if (wifiScanner != null) {
+            wifiScanner = null;
+        }
+    }
+
 
     /*---------------------------接口定义---------------------------*/
 
@@ -518,69 +544,7 @@ public class WifiManager {
         void requestRationalCanceled();
     }
 
-    /**
-     * WiFi状态改变时调用此接口
-     */
-    public interface WifiStateChangedListener {
-
-        /**
-         * WiFi已打开
-         */
-        void onWifiEnabled();
-
-        /**
-         * WiFi正在打开
-         */
-        void onWifiEnabling();
-
-        /**
-         * WiFi已关闭
-         */
-        void onWifiDisabled();
-
-        /**
-         * WiFi正在关闭
-         */
-        void onWifiDisabling();
-
-        /**
-         * 未知的WiFi状态
-         *
-         * @param wifiState WiFi状态
-         */
-        void unknownWifiState(int wifiState);
-
-    }
-
     /*---------------------------私有方法---------------------------*/
-
-    /**
-     * 显示没有“更改系统设置”权限的对话框
-     *
-     * @param activity                Activity
-     * @param requestPermissionResult 显示没有“更改系统设置”权限的对话框
-     */
-    private static void showNoWriteSettingsPermissionDialog(final Activity activity, final RequestPermissionResult requestPermissionResult) {
-        new AlertDialog.Builder(activity)
-                .setTitle(R.string.no_write_setting_permission)
-                .setMessage(R.string.no_write_setting_permission_message)
-                .setPositiveButton(R.string.allow, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        PermissionActivity.requestPermission(activity, requestPermissionResult);
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (requestPermissionResult != null) {
-                            requestPermissionResult.requestRationalCanceled();
-                        }
-                    }
-                })
-                .setCancelable(false)
-                .show();
-    }
 
     /**
      * 检查是否已经初始化
@@ -613,5 +577,40 @@ public class WifiManager {
                 }
             }
         }
+    }
+
+
+    /**
+     * 判断当前程序是否有定位权限
+     *
+     * @return true表示拥有权限
+     */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean hasLocationEnablePermission(@NonNull Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            //noinspection deprecation
+            int locationMode = Settings.Secure.LOCATION_MODE_OFF;
+            try {
+                //noinspection deprecation
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+            } catch (Exception ignored) {
+            }
+            //noinspection deprecation
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+        } else {
+            LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            if (locationManager == null) {
+                return false;
+            }
+            return locationManager.isLocationEnabled();
+        }
+    }
+
+    public static void toLocationGpsSettings(@NonNull Context context) {
+        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 }

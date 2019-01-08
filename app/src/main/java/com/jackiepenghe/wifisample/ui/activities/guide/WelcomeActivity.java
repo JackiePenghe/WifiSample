@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.v7.app.AlertDialog;
 
-import com.jackiepenghe.baselibrary.BaseWelcomeActivity;
-import com.jackiepenghe.baselibrary.CrashHandler;
-import com.jackiepenghe.baselibrary.Tool;
+import com.jackiepenghe.baselibrary.activity.BaseWelcomeActivity;
+import com.jackiepenghe.baselibrary.tools.CrashHandler;
+import com.jackiepenghe.baselibrary.tools.Tool;
 import com.jackiepenghe.wifilibrary.WifiManager;
 import com.jackiepenghe.wifisample.R;
 import com.jackiepenghe.wifisample.ui.activities.MainActivity;

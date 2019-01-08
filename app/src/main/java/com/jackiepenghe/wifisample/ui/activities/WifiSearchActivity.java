@@ -1,8 +1,7 @@
 package com.jackiepenghe.wifisample.ui.activities;
 
-import android.content.Intent;
 import android.graphics.Color;
-import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,16 +13,18 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.jackiepenghe.baselibrary.BaseAppCompatActivity;
-import com.jackiepenghe.baselibrary.DefaultItemDecoration;
-import com.jackiepenghe.baselibrary.Tool;
+import com.jackiepenghe.baselibrary.activity.BaseAppCompatActivity;
+import com.jackiepenghe.baselibrary.tools.Tool;
+import com.jackiepenghe.baselibrary.view.utils.DefaultItemDecoration;
+import com.jackiepenghe.wifilibrary.WifiConnector;
 import com.jackiepenghe.wifilibrary.WifiDevice;
 import com.jackiepenghe.wifilibrary.WifiManager;
-import com.jackiepenghe.wifilibrary.WifiOperatingTools;
+import com.jackiepenghe.wifilibrary.WifiScanner;
+import com.jackiepenghe.wifilibrary.intefaces.OnWifiConnectStateChangedListener;
+import com.jackiepenghe.wifilibrary.intefaces.OnWifiScanStateChangedListener;
 import com.jackiepenghe.wifisample.R;
 import com.jackiepenghe.wifisample.adapters.WifiDeviceAdapter;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,8 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      */
     private RecyclerView recyclerView;
 
+    private WifiConnector wifiConnector;
+
     /**
      * 用来显示当前的连接状态
      */
@@ -53,10 +56,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      */
     private Button searchButton;
 
-    /**
-     * WiFi扫描器
-     */
-    private WifiOperatingTools wifiOperatingTools;
+    private WifiScanner wifiScanner;
 
     /**
      * 适配器的数据源
@@ -68,25 +68,11 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      */
     private WifiDeviceAdapter wifiScanResultAdapter = new WifiDeviceAdapter(adapterList);
 
-    /**
-     * WiFi扫描器的扫描回调
-     */
-    private WifiOperatingTools.WifiScanCallback wifiScanCallback = new WifiOperatingTools.WifiScanCallback() {
-        @Override
-        public void startScanFailed() {
-            Tool.toastL(WifiSearchActivity.this, "扫描开启失败");
-        }
-
-        @Override
-        public void isScanning() {
-            Tool.toastL(WifiSearchActivity.this, "扫描已开启，正在扫描");
-        }
-    };
 
     /**
      * WiFi连接的扫描回调
      */
-    private WifiOperatingTools.WifiConnectCallback wifiConnectCallback = new WifiOperatingTools.WifiConnectCallback() {
+    private OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = new OnWifiConnectStateChangedListener() {
 
         private AlertDialog alertDialog;
 
@@ -201,37 +187,22 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
         public void cancelConnect(String ssid) {
             Tool.warnOut(TAG, "用户取消了本次连接");
             Tool.toastL(WifiSearchActivity.this, "取消连接 SSID:" + ssid);
+
         }
-    };
 
-    /**
-     * 获取到WiFi的扫描结果后进行的回调
-     */
-    private WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedListener = new WifiOperatingTools.WifiScanResultObtainedListener() {
+        /**
+         * 连接超时
+         */
         @Override
-        public void wifiScanResultObtained(ArrayList<WifiDevice> wifiDevices) {
-            if (wifiDevices == null) {
+        public void connectTimeOut() {
+            textView.setText(R.string.connect_time_out);
+            if (alertDialog == null) {
                 return;
             }
-            Tool.warnOut(TAG, "扫描结果已获取");
-            Tool.toastL(WifiSearchActivity.this, R.string.search_finished);
-            int size = wifiDevices.size();
-            if (size == 0) {
-                Tool.warnOut(TAG, "没有搜索到任何WiFi");
-                Tool.toastL(WifiSearchActivity.this, "没有搜索到任何WiFi");
-                return;
+            if (alertDialog.isShowing()) {
+                alertDialog.dismiss();
+                alertDialog = null;
             }
-
-            for (int i = 0; i < size; i++) {
-                WifiDevice wifiDevice = wifiDevices.get(i);
-                String ssid = wifiDevice.getSSID();
-                int level = wifiDevice.getIntLevel();
-                Tool.warnOut(TAG, "设备 " + (i + 1) + " :ssid = " + ssid + ",level = " + level);
-            }
-
-            adapterList.clear();
-            adapterList.addAll(wifiDevices);
-            wifiScanResultAdapter.notifyDataSetChanged();
         }
     };
     /**
@@ -254,10 +225,45 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
         @Override
         public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
             WifiDevice wifiDevice = adapterList.get(position);
-            Intent intent = new Intent(WifiSearchActivity.this, WifiSearchActivity.class);
-            intent.putExtra("AAAA", wifiDevice);
-            startActivity(intent);
             startConnect(wifiDevice);
+        }
+    };
+
+    private OnWifiScanStateChangedListener onWifiScanStateChangedListener = new OnWifiScanStateChangedListener() {
+        @Override
+        public void startScanFailed() {
+            Tool.toastL(WifiSearchActivity.this, "扫描开启失败");
+        }
+
+        @Override
+        public void isScanning() {
+            Tool.toastL(WifiSearchActivity.this, "扫描已开启，正在扫描");
+        }
+
+        @Override
+        public void wifiScanResultObtained(@Nullable ArrayList<WifiDevice> wifiDevices) {
+            if (wifiDevices == null) {
+                return;
+            }
+            Tool.warnOut(TAG, "扫描结果已获取");
+            Tool.toastL(WifiSearchActivity.this, R.string.search_finished);
+            int size = wifiDevices.size();
+            if (size == 0) {
+                Tool.warnOut(TAG, "没有搜索到任何WiFi");
+                Tool.toastL(WifiSearchActivity.this, "没有搜索到任何WiFi");
+                return;
+            }
+
+            for (int i = 0; i < size; i++) {
+                WifiDevice wifiDevice = wifiDevices.get(i);
+                String ssid = wifiDevice.getSSID();
+                int level = wifiDevice.getIntLevel();
+                Tool.warnOut(TAG, "设备 " + (i + 1) + " :ssid = " + ssid + ",level = " + level);
+            }
+
+            adapterList.clear();
+            adapterList.addAll(wifiDevices);
+            wifiScanResultAdapter.notifyDataSetChanged();
         }
     };
 
@@ -295,6 +301,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     @Override
     protected void doBeforeInitOthers() {
         initWifiScanner();
+        initWifiConnector();
     }
 
     /**
@@ -370,8 +377,8 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        wifiOperatingTools.close();
-        WifiManager.releaseWifiOperatingTools();
+        wifiScanner.close();
+        WifiManager.releaseWifiScanner();
     }
 
     /*---------------------------私有方法---------------------------*/
@@ -380,16 +387,20 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      * 初始化WiFi扫描器
      */
     private void initWifiScanner() {
-        wifiOperatingTools = WifiManager.getWifiOperatingToolsInstance();
-        wifiOperatingTools.init(wifiScanCallback, wifiConnectCallback);
-        wifiOperatingTools.setWifiScanResultObtainedListener(wifiScanResultObtainedListener);
+        wifiScanner = WifiManager.getWifiScannerInstance();
+        wifiScanner.setOnWifiScanStateChangedListener(onWifiScanStateChangedListener);
+    }
+
+    private void initWifiConnector() {
+        wifiConnector = WifiManager.getWifiConnectorInstance();
+        wifiConnector.addOnWifiConnectStateChangedListener(onWifiConnectStateChangedListener);
     }
 
     /**
      * 开始扫描（搜索WiFi）
      */
     private void startScan() {
-        wifiOperatingTools.startScan();
+        wifiScanner.startScan();
     }
 
     /**
@@ -404,16 +415,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
         recyclerView.setAdapter(wifiScanResultAdapter);
     }
 
-    /**
-     * 开始连接
-     *
-     * @param wifiDevice 扫描结果
-     */
     private void startConnect(WifiDevice wifiDevice) {
-        if (wifiDevice == null) {
-            return;
-        }
-        wifiOperatingTools.startConnect(WifiSearchActivity.this, wifiDevice);
-
+        wifiConnector.startConnect(WifiSearchActivity.this,wifiDevice);
     }
 }

@@ -7,12 +7,17 @@ import android.net.wifi.WifiConfiguration;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 
+
+import com.jackiepenghe.wifilibrary.intefaces.OnWifiHotspotIsConnectedByOthersListener;
+import com.jackiepenghe.wifilibrary.intefaces.OnWifiHotspotStateChangedListener;
+import com.jackiepenghe.wifilibrary.intefaces.impl.DefaultOnWifiHotspotIsConnectedByOthersListener;
+import com.jackiepenghe.wifilibrary.intefaces.impl.DefaultOnWifiHotspotStateChangedListener;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.Inet4Address;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadFactory;
@@ -58,7 +63,7 @@ public class WifiHotspotController {
     /**
      * WiFi热点相关的回调
      */
-    private WifiHotspotCreateCallback wifiHotspotCreateCallback;
+    private OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener;
 
     /**
      * 接收到数据时进行的回调
@@ -68,7 +73,7 @@ public class WifiHotspotController {
     /**
      * WiFi热点被连接的相关回调
      */
-    private WifiHotspotReceiveConnectedDeviceListener wifiHotspotReceiveConnectedDeviceListener;
+    private OnWifiHotspotIsConnectedByOthersListener onWifiHotspotIsConnectedByOthersListener;
 
     /**
      * 线程工厂
@@ -95,7 +100,6 @@ public class WifiHotspotController {
      */
     private boolean wifiApEnabled;
     private ArrayList<ConnectThread> connectThreads = new ArrayList<>();
-    ;
 
     /*---------------------------构造方法---------------------------*/
 
@@ -113,92 +117,96 @@ public class WifiHotspotController {
      * 初始化
      */
     public void init() {
-        init(false, new DefaultWifiHotspotCreateCallback(), new DefaultWifiHotspotReceiveConnectedDeviceListener());
+        init(false, new DefaultOnWifiHotspotStateChangedListener(), new DefaultOnWifiHotspotIsConnectedByOthersListener());
     }
 
 
     /**
      * 初始化
      *
-     * @param wifiHotspotCreateCallback WiFi连接的回调
+     * @param onWifiHotspotStateChangedListener WiFi连接的回调
      */
-    public void init(@NonNull WifiHotspotCreateCallback wifiHotspotCreateCallback) {
-        init(false, wifiHotspotCreateCallback, new DefaultWifiHotspotReceiveConnectedDeviceListener());
+    public void init(@NonNull OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener) {
+        init(false, onWifiHotspotStateChangedListener, new DefaultOnWifiHotspotIsConnectedByOthersListener());
     }
 
     /**
      * 初始化
      *
-     * @param wifiHotspotReceiveConnectedDeviceListener WiFi热点被连接时的回调
+     * @param onWifiHotspotIsConnectedByOthersListener WiFi热点被连接时的回调
      */
-    public void init(@NonNull WifiHotspotReceiveConnectedDeviceListener wifiHotspotReceiveConnectedDeviceListener) {
-        init(false, new DefaultWifiHotspotCreateCallback(), wifiHotspotReceiveConnectedDeviceListener);
+    public void init(@NonNull OnWifiHotspotIsConnectedByOthersListener onWifiHotspotIsConnectedByOthersListener) {
+        init(false, new DefaultOnWifiHotspotStateChangedListener(), onWifiHotspotIsConnectedByOthersListener);
     }
 
     /**
      * 初始化
      *
-     * @param wifiHotspotCreateCallback                 WiFi连接的回调
-     * @param wifiHotspotReceiveConnectedDeviceListener WiFi热点被连接时的回调
+     * @param onWifiHotspotStateChangedListener                 WiFi连接的回调
+     * @param onWifiHotspotIsConnectedByOthersListener WiFi热点被连接时的回调
      */
-    public void init(@NonNull WifiHotspotCreateCallback wifiHotspotCreateCallback, @NonNull WifiHotspotReceiveConnectedDeviceListener wifiHotspotReceiveConnectedDeviceListener) {
-        init(false, wifiHotspotCreateCallback, wifiHotspotReceiveConnectedDeviceListener);
+    public void init( @NonNull OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener,
+                      @NonNull OnWifiHotspotIsConnectedByOthersListener onWifiHotspotIsConnectedByOthersListener) {
+        init(false, onWifiHotspotStateChangedListener, onWifiHotspotIsConnectedByOthersListener);
     }
 
     /**
      * 初始化
      *
-     * @param hiddenSsid                                是否隐藏热点
-     * @param wifiHotspotCreateCallback                 WiFi连接的回调
-     * @param wifiHotspotReceiveConnectedDeviceListener WiFi热点被连接时的回调
-     */
-    @SuppressWarnings("WeakerAccess")
-    public void init(boolean hiddenSsid, @NonNull WifiHotspotCreateCallback wifiHotspotCreateCallback, @NonNull WifiHotspotReceiveConnectedDeviceListener wifiHotspotReceiveConnectedDeviceListener) {
-        init(WIFI_HOTSPOT_SSID, hiddenSsid, wifiHotspotCreateCallback, wifiHotspotReceiveConnectedDeviceListener);
-    }
-
-    /**
-     * 初始化
-     *
-     * @param ssidName                                  热点名称
-     * @param hiddenSsid                                是否隐藏热点
-     * @param wifiHotspotCreateCallback                 WiFi连接的回调
-     * @param wifiHotspotReceiveConnectedDeviceListener WiFi热点被连接时的回调
+     * @param hiddenSsid                               是否隐藏热点
+     * @param onWifiHotspotStateChangedListener        WiFi连接的回调
+     * @param onWifiHotspotIsConnectedByOthersListener WiFi热点被连接时的回调
      */
     @SuppressWarnings("WeakerAccess")
-    public void init(String ssidName, boolean hiddenSsid, @NonNull WifiHotspotCreateCallback wifiHotspotCreateCallback, @NonNull WifiHotspotReceiveConnectedDeviceListener wifiHotspotReceiveConnectedDeviceListener) {
-        init(ssidName, WIFI_HOTSPOT_PASSWORD, hiddenSsid, true, WifiConfiguration.KeyMgmt.NONE, wifiHotspotCreateCallback, wifiHotspotReceiveConnectedDeviceListener);
+    public void init(boolean hiddenSsid, @NonNull OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener, @NonNull OnWifiHotspotIsConnectedByOthersListener onWifiHotspotIsConnectedByOthersListener) {
+        init(WIFI_HOTSPOT_SSID, hiddenSsid, onWifiHotspotStateChangedListener, onWifiHotspotIsConnectedByOthersListener);
     }
 
     /**
      * 初始化
      *
-     * @param ssidName                                  热点名称
-     * @param preSharedKey                              热点密码
-     * @param keyMgmt                                   热点加密方式
-     * @param wifiHotspotCreateCallback                 WiFi连接的回调
-     * @param wifiHotspotReceiveConnectedDeviceListener WiFi热点被连接时的回调
-     */
-    public void init(String ssidName, String preSharedKey, int keyMgmt, @NonNull WifiHotspotCreateCallback wifiHotspotCreateCallback, @NonNull WifiHotspotReceiveConnectedDeviceListener wifiHotspotReceiveConnectedDeviceListener) {
-        init(ssidName, preSharedKey, false, false, keyMgmt, wifiHotspotCreateCallback, wifiHotspotReceiveConnectedDeviceListener);
-    }
-
-    /**
-     * 初始化
-     *
-     * @param ssidName                                  热点名称
-     * @param preSharedKey                              热点密码
-     * @param hiddenSsid                                是否隐藏热点
-     * @param withoutPassword                           是否需要密码
-     * @param keyMgmt                                   热点加密方式
-     * @param wifiHotspotCreateCallback                 WiFi连接的回调
-     * @param wifiHotspotReceiveConnectedDeviceListener WiFi热点被连接时的回调
+     * @param ssidName                                 热点名称
+     * @param hiddenSsid                               是否隐藏热点
+     * @param onWifiHotspotStateChangedListener        WiFi连接的回调
+     * @param onWifiHotspotIsConnectedByOthersListener WiFi热点被连接时的回调
      */
     @SuppressWarnings("WeakerAccess")
-    public void init(String ssidName, String preSharedKey, boolean hiddenSsid, boolean withoutPassword, int keyMgmt, @NonNull WifiHotspotCreateCallback wifiHotspotCreateCallback, @NonNull WifiHotspotReceiveConnectedDeviceListener wifiHotspotReceiveConnectedDeviceListener) {
+    public void init(String ssidName, boolean hiddenSsid, @NonNull OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener, @NonNull OnWifiHotspotIsConnectedByOthersListener onWifiHotspotIsConnectedByOthersListener) {
+        init(ssidName, WIFI_HOTSPOT_PASSWORD, hiddenSsid, true, WifiConfiguration.KeyMgmt.NONE, onWifiHotspotStateChangedListener, onWifiHotspotIsConnectedByOthersListener);
+    }
+
+    /**
+     * 初始化
+     *
+     * @param ssidName                                 热点名称
+     * @param preSharedKey                             热点密码
+     * @param keyMgmt                                  热点加密方式
+     * @param onWifiHotspotStateChangedListener        WiFi连接的回调
+     * @param onWifiHotspotIsConnectedByOthersListener WiFi热点被连接时的回调
+     */
+    public void init(String ssidName, String preSharedKey, int keyMgmt, @NonNull OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener,
+                     @NonNull OnWifiHotspotIsConnectedByOthersListener onWifiHotspotIsConnectedByOthersListener) {
+        init(ssidName, preSharedKey, false, false, keyMgmt, onWifiHotspotStateChangedListener, onWifiHotspotIsConnectedByOthersListener);
+    }
+
+    /**
+     * 初始化
+     *
+     * @param ssidName                                 热点名称
+     * @param preSharedKey                             热点密码
+     * @param hiddenSsid                               是否隐藏热点
+     * @param withoutPassword                          是否需要密码
+     * @param keyMgmt                                  热点加密方式
+     * @param onWifiHotspotStateChangedListener        WiFi连接的回调
+     * @param onWifiHotspotIsConnectedByOthersListener WiFi热点被连接时的回调
+     */
+    @SuppressWarnings("WeakerAccess")
+    public void init(String ssidName, String preSharedKey, boolean hiddenSsid, boolean withoutPassword,
+                     int keyMgmt, @NonNull OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener,
+                     @NonNull OnWifiHotspotIsConnectedByOthersListener onWifiHotspotIsConnectedByOthersListener) {
         wifiConfiguration = getWifiConfiguration(ssidName, preSharedKey, hiddenSsid, withoutPassword, keyMgmt);
-        this.wifiHotspotCreateCallback = wifiHotspotCreateCallback;
-        this.wifiHotspotReceiveConnectedDeviceListener = wifiHotspotReceiveConnectedDeviceListener;
+        this.onWifiHotspotStateChangedListener = onWifiHotspotStateChangedListener;
+        this.onWifiHotspotIsConnectedByOthersListener = onWifiHotspotIsConnectedByOthersListener;
         isInit = true;
     }
 
@@ -208,16 +216,16 @@ public class WifiHotspotController {
     public void createHotspot() {
         checkInitStatus();
         if (wifiConfiguration == null) {
-            Tool.errorOut(TAG, "Create failed!The wifiConfiguration is null");
-            if (wifiHotspotCreateCallback != null) {
-                wifiHotspotCreateCallback.onWifiHotspotCreateFailed(wifiConfiguration);
+            DebugUtil.errorOut(TAG, "Create failed!The wifiConfiguration is null");
+            if (onWifiHotspotStateChangedListener != null) {
+                onWifiHotspotStateChangedListener.onWifiHotspotCreateFailed(wifiConfiguration);
             }
             return;
         }
         if (systemWifiManager == null) {
-            Tool.errorOut(TAG, "Create failed!The systemWifiManager is null");
-            if (wifiHotspotCreateCallback != null) {
-                wifiHotspotCreateCallback.onWifiHotspotCreateFailed(wifiConfiguration);
+            DebugUtil.errorOut(TAG, "Create failed!The systemWifiManager is null");
+            if (onWifiHotspotStateChangedListener != null) {
+                onWifiHotspotStateChangedListener.onWifiHotspotCreateFailed(wifiConfiguration);
             }
             return;
         }
@@ -225,13 +233,13 @@ public class WifiHotspotController {
             Method method = systemWifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
             boolean result = (boolean) method.invoke(systemWifiManager, wifiConfiguration, true);
             if (!result) {
-                if (wifiHotspotCreateCallback != null) {
-                    wifiHotspotCreateCallback.onWifiHotspotCreateFailed(wifiConfiguration);
+                if (onWifiHotspotStateChangedListener != null) {
+                    onWifiHotspotStateChangedListener.onWifiHotspotCreateFailed(wifiConfiguration);
                 }
                 return;
             }
-            if (wifiHotspotCreateCallback != null) {
-                wifiHotspotCreateCallback.onWifiHotspotCreating(wifiConfiguration);
+            if (onWifiHotspotStateChangedListener != null) {
+                onWifiHotspotStateChangedListener.onWifiHotspotCreating(wifiConfiguration);
             }
             threadFactory.newThread(new Runnable() {
                 @Override
@@ -243,8 +251,8 @@ public class WifiHotspotController {
                             handler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (wifiHotspotCreateCallback != null) {
-                                        wifiHotspotCreateCallback.onWifiHotspotCreated(wifiConfiguration);
+                                    if (onWifiHotspotStateChangedListener != null) {
+                                        onWifiHotspotStateChangedListener.onWifiHotspotCreated(wifiConfiguration);
                                         Thread thread = threadFactory.newThread(new Runnable() {
 
                                             @Override
@@ -253,19 +261,19 @@ public class WifiHotspotController {
                                                     ArrayList<String> connectedIP = getConnectedIpStringList();
                                                     if (oldConnectedIP == null || oldConnectedIP.size() != connectedIP.size()) {
                                                         oldConnectedIP = connectedIP;
-                                                        if (wifiHotspotReceiveConnectedDeviceListener != null) {
-                                                            wifiHotspotReceiveConnectedDeviceListener.onConnectedDevices(connectedIP);
+                                                        if (onWifiHotspotIsConnectedByOthersListener != null) {
+                                                            onWifiHotspotIsConnectedByOthersListener.onConnectedDevices(connectedIP);
                                                         }
 
                                                         for (int i = 0; i < connectedIP.size(); i++) {
                                                             String ip = connectedIP.get(i);
-                                                            Tool.warnOut(TAG,"创建Socket。ip = " + ip);
+                                                            DebugUtil.warnOut(TAG, "创建Socket。ip = " + ip);
                                                             Socket socket = null;
                                                             try {
                                                                 socket = new Socket(ip, port);
                                                             } catch (IOException e) {
                                                                 e.printStackTrace();
-                                                                Tool.warnOut(TAG,"创建Socket失败");
+                                                                DebugUtil.warnOut(TAG, "创建Socket失败");
                                                             }
                                                             if (socket == null) {
                                                                 continue;
@@ -276,8 +284,8 @@ public class WifiHotspotController {
                                                                 connectThread.start();
                                                                 connectThreads.add(connectThread);
                                                             }
-                                                            if (wifiHotspotReceiveConnectedDeviceListener != null) {
-                                                                wifiHotspotReceiveConnectedDeviceListener.onDeviceConnected(ip);
+                                                            if (onWifiHotspotIsConnectedByOthersListener != null) {
+                                                                onWifiHotspotIsConnectedByOthersListener.onDeviceConnected(ip);
                                                             }
                                                         }
                                                     } else {
@@ -303,8 +311,8 @@ public class WifiHotspotController {
                                                                         connectThread.start();
                                                                         connectThreads.add(connectThread);
                                                                     }
-                                                                    if (wifiHotspotReceiveConnectedDeviceListener != null) {
-                                                                        wifiHotspotReceiveConnectedDeviceListener.onDeviceConnected(ip);
+                                                                    if (onWifiHotspotIsConnectedByOthersListener != null) {
+                                                                        onWifiHotspotIsConnectedByOthersListener.onDeviceConnected(ip);
                                                                     }
                                                                 }
                                                             }
@@ -331,16 +339,16 @@ public class WifiHotspotController {
                                                                         connectThread1.setKeepRun(false);
                                                                         connectThreads.remove(indexOf);
                                                                     }
-                                                                    if (wifiHotspotReceiveConnectedDeviceListener != null) {
-                                                                        wifiHotspotReceiveConnectedDeviceListener.onDeviceDisConnected(ip);
+                                                                    if (onWifiHotspotIsConnectedByOthersListener != null) {
+                                                                        onWifiHotspotIsConnectedByOthersListener.onDeviceDisConnected(ip);
                                                                     }
                                                                 }
                                                             }
                                                         }
                                                         oldConnectedIP = connectedIP;
                                                         if (changed) {
-                                                            if (wifiHotspotReceiveConnectedDeviceListener != null) {
-                                                                wifiHotspotReceiveConnectedDeviceListener.onConnectedDevices(connectedIP);
+                                                            if (onWifiHotspotIsConnectedByOthersListener != null) {
+                                                                onWifiHotspotIsConnectedByOthersListener.onConnectedDevices(connectedIP);
                                                             }
                                                         }
                                                     }
@@ -358,8 +366,8 @@ public class WifiHotspotController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            if (wifiHotspotCreateCallback != null) {
-                wifiHotspotCreateCallback.onWifiHotspotCreateFailed(wifiConfiguration);
+            if (onWifiHotspotStateChangedListener != null) {
+                onWifiHotspotStateChangedListener.onWifiHotspotCreateFailed(wifiConfiguration);
             }
         }
     }
@@ -407,8 +415,8 @@ public class WifiHotspotController {
     public void close() {
         checkInitStatus();
         if (!isWifiApEnabled()) {
-            if (wifiHotspotCreateCallback != null) {
-                wifiHotspotCreateCallback.onWifiHotspotCloseFailed(wifiConfiguration);
+            if (onWifiHotspotStateChangedListener != null) {
+                onWifiHotspotStateChangedListener.onWifiHotspotCloseFailed(wifiConfiguration);
             }
             return;
         }
@@ -420,13 +428,13 @@ public class WifiHotspotController {
             Method method2 = systemWifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
             boolean result = (boolean) method2.invoke(systemWifiManager, config, false);
             if (!result) {
-                if (wifiHotspotCreateCallback != null) {
-                    wifiHotspotCreateCallback.onWifiHotspotCloseFailed(wifiConfiguration);
+                if (onWifiHotspotStateChangedListener != null) {
+                    onWifiHotspotStateChangedListener.onWifiHotspotCloseFailed(wifiConfiguration);
                 }
                 return;
             }
-            if (wifiHotspotCreateCallback != null) {
-                wifiHotspotCreateCallback.onWifiHotspotClosing();
+            if (onWifiHotspotStateChangedListener != null) {
+                onWifiHotspotStateChangedListener.onWifiHotspotClosing();
             }
             threadFactory.newThread(new Runnable() {
                 @Override
@@ -437,8 +445,8 @@ public class WifiHotspotController {
                             handler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (wifiHotspotCreateCallback != null) {
-                                        wifiHotspotCreateCallback.onWifiHotspotClosed(wifiConfiguration);
+                                    if (onWifiHotspotStateChangedListener != null) {
+                                        onWifiHotspotStateChangedListener.onWifiHotspotClosed(wifiConfiguration);
                                     }
                                 }
                             });
@@ -448,8 +456,8 @@ public class WifiHotspotController {
             }).start();
         } catch (Exception e) {
             e.printStackTrace();
-            if (wifiHotspotCreateCallback != null) {
-                wifiHotspotCreateCallback.onWifiHotspotCloseFailed(wifiConfiguration);
+            if (onWifiHotspotStateChangedListener != null) {
+                onWifiHotspotStateChangedListener.onWifiHotspotCloseFailed(wifiConfiguration);
             }
         }
     }
@@ -462,7 +470,7 @@ public class WifiHotspotController {
     public boolean isWifiApEnabled() {
         checkInitStatus();
         if (systemWifiManager == null) {
-            Tool.errorOut(TAG, "systemWifiManager is null!");
+            DebugUtil.errorOut(TAG, "systemWifiManager is null!");
             return false;
         }
 
@@ -512,77 +520,6 @@ public class WifiHotspotController {
     /*---------------------------接口定义---------------------------*/
 
     /**
-     * WiFi热点创建的相关回调
-     */
-    public interface WifiHotspotCreateCallback {
-        /**
-         * 热点正在创建
-         *
-         * @param wifiConfiguration WiFi的配置
-         */
-        void onWifiHotspotCreating(WifiConfiguration wifiConfiguration);
-
-        /**
-         * 热点创建完成
-         *
-         * @param wifiConfiguration WiFi的配置
-         */
-        void onWifiHotspotCreated(WifiConfiguration wifiConfiguration);
-
-        /**
-         * 热点创建失败
-         *
-         * @param wifiConfiguration WiFi的配置
-         */
-        void onWifiHotspotCreateFailed(WifiConfiguration wifiConfiguration);
-
-        /**
-         * WiFi热点正在关闭
-         */
-        void onWifiHotspotClosing();
-
-        /**
-         * WiFi热点关闭完成
-         *
-         * @param wifiConfiguration WiFi的配置
-         */
-        void onWifiHotspotClosed(WifiConfiguration wifiConfiguration);
-
-        /**
-         * WiFi热点关闭失败
-         *
-         * @param wifiConfiguration WiFi的配置
-         */
-        void onWifiHotspotCloseFailed(WifiConfiguration wifiConfiguration);
-    }
-
-    /**
-     * WiFi热点被连接后的回调
-     */
-    public interface WifiHotspotReceiveConnectedDeviceListener {
-        /**
-         * WiFi热点被连接后，连接手机的设备的IP地址集合
-         *
-         * @param connectedIPs 连接手机的设备的IP地址集合
-         */
-        void onConnectedDevices(ArrayList<String> connectedIPs);
-
-        /**
-         * WiFi热点被连接，连接手机的新的设备的IP地址
-         *
-         * @param connectedIP 连接手机的新的设备的IP地址
-         */
-        void onDeviceConnected(String connectedIP);
-
-        /**
-         * WiFi热点被断开连接，断开连接的设备的IP地址
-         *
-         * @param connectedIP 断开连接的设备的IP地址
-         */
-        void onDeviceDisConnected(String connectedIP);
-    }
-
-    /**
      * 当数据切换后的监听
      */
     public interface OnDataReceivedListener {
@@ -627,8 +564,7 @@ public class WifiHotspotController {
                 config.allowedKeyManagement.set(keyMgmt);
             }
         }
-        config.allowedPairwiseCiphers
-                .set(WifiConfiguration.PairwiseCipher.TKIP);
+        config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
         config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         config.allowedPairwiseCiphers
                 .set(WifiConfiguration.PairwiseCipher.CCMP);

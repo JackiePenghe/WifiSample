@@ -4,10 +4,13 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
-import com.jackiepenghe.baselibrary.FileUtil;
-import com.jackiepenghe.baselibrary.Tool;
+import com.jackiepenghe.baselibrary.files.FileUtil;
+import com.jackiepenghe.baselibrary.tools.Tool;
 import com.jackiepenghe.wifilibrary.WifiManager;
 
+/**
+ * @author jackie
+ */
 public class MyApplication extends Application {
     /**
      * Called when the application is starting, before any activity, service,

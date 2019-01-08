@@ -1,6 +1,5 @@
 package com.jackiepenghe.wifilibrary;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -14,15 +13,12 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import static com.jackiepenghe.wifilibrary.WifiManager.REQUEST_CODE_WRITE_SETTINGS;
 
 /**
  * @author jackie
@@ -32,6 +28,7 @@ public class PermissionActivity extends AppCompatActivity {
 
     private static WifiManager.RequestPermissionResult requestPermissionResult;
 
+    private static final int REQUEST_CODE_WRITE_SETTINGS = 10;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

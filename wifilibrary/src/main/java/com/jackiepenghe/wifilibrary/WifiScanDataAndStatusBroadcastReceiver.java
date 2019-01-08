@@ -10,6 +10,9 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 
+import com.jackiepenghe.wifilibrary.intefaces.OnWifiScanStateChangedListener;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +21,8 @@ import java.util.List;
  */
 public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
 
+    private WeakReference<WifiScanner> wifiScannerWeakReference;
+
     /*---------------------------静态常量---------------------------*/
 
     private static final String TAG = WifiScanDataAndStatusBroadcastReceiver.class.getSimpleName();
@@ -25,17 +30,12 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
     /*---------------------------成员变量---------------------------*/
 
     /**
-     * 系统的WiFi管理器
-     */
-    private android.net.wifi.WifiManager systemWifiManager;
-
-    /**
      * 获取到WiFi扫描的结果时的回调
      */
-    private WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedListener;
+    private OnWifiScanStateChangedListener wifiScanResultObtainedListener;
 
-    public WifiScanDataAndStatusBroadcastReceiver(WifiManager systemWifiManager) {
-        this.systemWifiManager = systemWifiManager;
+    public WifiScanDataAndStatusBroadcastReceiver(WifiScanner wifiScannerWeakReference) {
+        this.wifiScannerWeakReference = new WeakReference<>(wifiScannerWeakReference);
     }
 
     /**
@@ -86,14 +86,10 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
 
         switch (action) {
             // wifi已成功扫描到可用wifi。
-            case android.net.wifi.WifiManager.SCAN_RESULTS_AVAILABLE_ACTION:
+            case WifiManager.SCAN_RESULTS_AVAILABLE_ACTION:
 
-                List<ScanResult> scanResults = systemWifiManager.getScanResults();
+                List<ScanResult> scanResults = com.jackiepenghe.wifilibrary.WifiManager.getSystemWifiManager().getScanResults();
                 int size = scanResults.size();
-                if (size == 0) {
-                    Tool.toastL(context, R.string.search_nothing);
-                    return;
-                }
                 // 每次最大元素就像气泡一样"浮"到数组的最后
                 for (int j = 0; j < size - 1; j++) {
                     // 依次比较相邻的两个元素,使较小的那个向后移
@@ -114,8 +110,6 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
                         scanResults.remove(i);
                         scanResults.add(scanResult);
                     }
-                    int level = scanResult.level;
-                    Tool.warnOut(TAG, "设备 " + (i + 1) + " :ssid = " + ssid + ",level = " + level);
                 }
 
                 ArrayList<WifiDevice> wifiDevices = new ArrayList<>();
@@ -132,13 +126,18 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
                     }
                     wifiDevices.add(wifiDevice);
                 }
-
-                if (wifiScanResultObtainedListener != null) {
-                    wifiScanResultObtainedListener.wifiScanResultObtained(wifiDevices);
+                WifiScanner wifiScanner = wifiScannerWeakReference.get();
+                if (wifiScanner == null) {
+                    return;
+                }
+                if (wifiScanner.isScanning()) {
+                    if (wifiScanResultObtainedListener != null) {
+                        wifiScanResultObtainedListener.wifiScanResultObtained(wifiDevices);
+                    }
                 }
                 break;
             default:
-                Tool.warnOut(TAG, "action = " + action);
+                DebugUtil.warnOut(TAG, "action = " + action);
                 break;
         }
     }
@@ -148,9 +147,9 @@ public class WifiScanDataAndStatusBroadcastReceiver extends BroadcastReceiver {
     /**
      * 设置获取到WiFi扫描的结果时的回调
      *
-     * @param wifiScanResultObtainedListener 获取到WiFi扫描的结果时的回调
+     * @param onWifiScanStateChangedListener 获取到WiFi扫描的结果时的回调
      */
-    public void setWifiScanResultObtainedListener(WifiOperatingTools.WifiScanResultObtainedListener wifiScanResultObtainedListener) {
-        this.wifiScanResultObtainedListener = wifiScanResultObtainedListener;
+    public void setOnWifiScanStateChangedListener(OnWifiScanStateChangedListener onWifiScanStateChangedListener) {
+        this.wifiScanResultObtainedListener = onWifiScanStateChangedListener;
     }
 }

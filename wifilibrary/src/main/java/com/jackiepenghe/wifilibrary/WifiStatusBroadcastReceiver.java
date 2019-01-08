@@ -10,6 +10,9 @@ import android.content.ServiceConnection;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 
+import com.jackiepenghe.wifilibrary.intefaces.OnWifiStateChangedListener;
+
+
 /**
  * @author jackie
  */
@@ -24,7 +27,7 @@ public class WifiStatusBroadcastReceiver extends BroadcastReceiver {
     /**
      * WiFi状态改变时进行的回调
      */
-    private com.jackiepenghe.wifilibrary.WifiManager.WifiStateChangedListener wifiStateChangedListener;
+    private OnWifiStateChangedListener wifiStateChangedListener;
 
     /**
      * This method is called when the BroadcastReceiver is receiving an Intent
@@ -70,29 +73,29 @@ public class WifiStatusBroadcastReceiver extends BroadcastReceiver {
         }
 
         switch (action){
-            case android.net.wifi.WifiManager.WIFI_STATE_CHANGED_ACTION:
+            case WifiManager.WIFI_STATE_CHANGED_ACTION:
                 //获取当前的wifi状态int类型数据
-                int mWifiState = intent.getIntExtra(android.net.wifi.WifiManager.EXTRA_WIFI_STATE, 0);
+                int mWifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
                 switch (mWifiState) {
-                    case android.net.wifi.WifiManager.WIFI_STATE_ENABLED:
+                    case WifiManager.WIFI_STATE_ENABLED:
                         //已打开
                         if (wifiStateChangedListener != null){
                             wifiStateChangedListener.onWifiEnabled();
                         }
                         break;
-                    case android.net.wifi.WifiManager.WIFI_STATE_ENABLING:
+                    case WifiManager.WIFI_STATE_ENABLING:
                         //打开中
                         if (wifiStateChangedListener != null){
                             wifiStateChangedListener.onWifiEnabling();
                         }
                         break;
-                    case android.net.wifi.WifiManager.WIFI_STATE_DISABLED:
+                    case WifiManager.WIFI_STATE_DISABLED:
                         if (wifiStateChangedListener != null){
                             wifiStateChangedListener.onWifiDisabled();
                         }
                         //已关闭
                         break;
-                    case android.net.wifi.WifiManager.WIFI_STATE_DISABLING:
+                    case WifiManager.WIFI_STATE_DISABLING:
                         //关闭中
                         if (wifiStateChangedListener != null){
                             wifiStateChangedListener.onWifiDisabling();
@@ -112,7 +115,7 @@ public class WifiStatusBroadcastReceiver extends BroadcastReceiver {
                 }
                 break;
             default:
-                Tool.warnOut(TAG, "action = " + action);
+                DebugUtil.warnOut(TAG, "action = " + action);
                 break;
         }
     }
@@ -121,7 +124,7 @@ public class WifiStatusBroadcastReceiver extends BroadcastReceiver {
      * 设置WiFi状态改变时进行的回调
      * @param wifiStateChangedListener WiFi状态改变时进行的回调
      */
-    public void setWifiStateChangedListener(com.jackiepenghe.wifilibrary.WifiManager.WifiStateChangedListener wifiStateChangedListener) {
+    public void setWifiStateChangedListener(OnWifiStateChangedListener wifiStateChangedListener) {
         this.wifiStateChangedListener = wifiStateChangedListener;
     }
 }

@@ -9,6 +9,11 @@ import android.content.IntentFilter;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+
+import com.jackiepenghe.wifilibrary.intefaces.OnWifiConnectStateChangedListener;
+
+import java.util.ArrayList;
 
 /**
  * @author jackie
@@ -22,24 +27,27 @@ public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
     /*---------------------------成员变量---------------------------*/
 
     /**
-     * 系统的WiFi管理器
+     * WifiConnector
      */
-    private android.net.wifi.WifiManager systemWifiManager;
+    private WifiConnector wifiConnector;
 
     /**
      * WiFi连接的回调
      */
-    private com.jackiepenghe.wifilibrary.WifiOperatingTools.WifiConnectCallback wifiConnectCallback;
+    private ArrayList<OnWifiConnectStateChangedListener> onWifiConnectStateChangedListeners = new ArrayList<>();
+
+    private android.net.wifi.WifiManager wifiManager;
 
     /*---------------------------构造方法---------------------------*/
 
     /**
      * 构造方法
      *
-     * @param systemWifiManager 系统的WiFi管理器
+     * @param wifiConnector WifiConnector
      */
-    public WifiConnectStatusBroadcastReceiver(android.net.wifi.WifiManager systemWifiManager) {
-        this.systemWifiManager = systemWifiManager;
+    public WifiConnectStatusBroadcastReceiver(WifiConnector wifiConnector) {
+        this.wifiConnector = wifiConnector;
+        wifiManager = WifiManager.getSystemWifiManager();
     }
 
     /**
@@ -88,67 +96,50 @@ public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
             case android.net.wifi.WifiManager.NETWORK_STATE_CHANGED_ACTION:
                 NetworkInfo info = intent.getParcelableExtra(android.net.wifi.WifiManager.EXTRA_NETWORK_INFO);
                 if (info.getState().equals(NetworkInfo.State.DISCONNECTED)) {
-                    if (wifiConnectCallback != null) {
-                        wifiConnectCallback.disconnected();
-                    }
+                    performWifiDisconnectedListener();
 
                 } else if (info.getState().equals(NetworkInfo.State.CONNECTING)) {
-                    WifiInfo wifiInfo = systemWifiManager.getConnectionInfo();
+                    WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                     if (wifiInfo == null) {
-                        Tool.warnOut(TAG, "wifiInfo == null");
+                        DebugUtil.warnOut(TAG, "wifiInfo == null");
                         return;
                     }
-                    if (wifiConnectCallback != null) {
-                        wifiConnectCallback.connecting(wifiInfo.getSSID());
-                    }
+                    performWifiConnectingListener(wifiInfo.getSSID());
                     NetworkInfo.DetailedState state = info.getDetailedState();
                     if (state == NetworkInfo.DetailedState.AUTHENTICATING) {
-                        if (wifiConnectCallback != null) {
-                            wifiConnectCallback.authenticating(wifiInfo.getSSID());
-                        }
+                        performWifiAuthenticatingListener(wifiInfo.getSSID());
                     } else if (state == NetworkInfo.DetailedState.OBTAINING_IPADDR) {
-                        if (wifiConnectCallback != null) {
-                            wifiConnectCallback.obtainingIpAddress(wifiInfo.getSSID());
-                        }
+                        performWifiObtainingIpAddressListener(wifiInfo.getSSID());
                     } else if (state == NetworkInfo.DetailedState.FAILED) {
-                        if (wifiConnectCallback != null) {
-                            wifiConnectCallback.connectFailed(wifiInfo.getSSID());
-                        }
+                        performWifiConnectFailedListener(wifiInfo.getSSID());
                     }
+                    wifiConnector.onWifiConnected(wifiInfo.getSSID());
                     //获取当前wifi名称
-                    if (wifiConnectCallback != null) {
-                        wifiConnectCallback.connected(wifiInfo.getSSID());
-                    }
+                    performWifiConnectedListener(wifiInfo.getSSID());
                 } else if (info.getState().equals(NetworkInfo.State.CONNECTED)) {
-                    WifiInfo wifiInfo = systemWifiManager.getConnectionInfo();
+                    WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                     NetworkInfo.DetailedState state = info.getDetailedState();
-                    String ssid = wifiInfo.getSSID();
-                    Tool.warnOut(TAG,"ssid = " + ssid);
+                    final String ssid = wifiInfo.getSSID();
+                    DebugUtil.warnOut(TAG,"ssid = " + ssid);
                     if (state == NetworkInfo.DetailedState.AUTHENTICATING) {
-                        if (wifiConnectCallback != null) {
-                            wifiConnectCallback.authenticating(ssid);
-                        }
+                        performWifiAuthenticatingListener(ssid);
+
                     } else if (state == NetworkInfo.DetailedState.OBTAINING_IPADDR) {
-                        if (wifiConnectCallback != null) {
-                            wifiConnectCallback.obtainingIpAddress(ssid);
-                        }
+                        performWifiObtainingIpAddressListener(ssid);
                     } else if (state == NetworkInfo.DetailedState.FAILED) {
-                        if (wifiConnectCallback != null) {
-                            wifiConnectCallback.connectFailed(ssid);
-                        }
+                        performWifiConnectFailedListener(ssid);
                     }
+                    wifiConnector.onWifiConnected(ssid);
                     //获取当前wifi名称
-                    if (wifiConnectCallback != null) {
-                        wifiConnectCallback.connected(ssid);
-                    }
+                    performWifiConnectedListener(ssid);
                 } else if (info.getState().equals(NetworkInfo.State.DISCONNECTING)) {
-                    wifiConnectCallback.disconnecting();
+                    performWifiDisconnectingListener();
                 } else if (info.getState().equals(NetworkInfo.State.UNKNOWN)) {
-                    wifiConnectCallback.unknownStatus();
+                    performWifiUnknownStateListener();
                 }
                 break;
             default:
-                Tool.warnOut(TAG, "action = " + action);
+                DebugUtil.warnOut(TAG, "action = " + action);
                 break;
         }
     }
@@ -156,11 +147,136 @@ public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
     /*---------------------------getter & setter---------------------------*/
 
     /**
-     * 设置WiFi连接的回调
+     * 添加WiFi连接的回调
      *
-     * @param wifiConnectCallback WiFi连接的回调
+     * @param onWifiConnectStateChangedListener WiFi连接的回调
      */
-    public void setWifiConnectCallback(WifiOperatingTools.WifiConnectCallback wifiConnectCallback) {
-        this.wifiConnectCallback = wifiConnectCallback;
+    public boolean addOnWifiConnectStateChangedListener(@NonNull OnWifiConnectStateChangedListener onWifiConnectStateChangedListener) {
+        return onWifiConnectStateChangedListeners.add(onWifiConnectStateChangedListener);
     }
+
+    /**
+     * 移除WiFi连接的回调
+     *
+     * @param onWifiConnectStateChangedListener WiFi连接的回调
+     */
+    public boolean removeOnWifiConnectStateChangedListener(@NonNull OnWifiConnectStateChangedListener onWifiConnectStateChangedListener) {
+        return onWifiConnectStateChangedListeners.remove(onWifiConnectStateChangedListener);
+    }
+    public void removeAllOnWifiConnectStateChangedListener() {
+        onWifiConnectStateChangedListeners.clear();
+    }
+
+    private void performWifiAuthenticatingListener(final String ssid) {
+        WifiManager.getHANDLER().post(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                    if (onWifiConnectStateChangedListener != null) {
+                        onWifiConnectStateChangedListener.authenticating(ssid);
+                    }
+                }
+            }
+        });
+    }
+
+    private void performWifiObtainingIpAddressListener(final String ssid) {
+        WifiManager.getHANDLER().post(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                    if (onWifiConnectStateChangedListener != null) {
+                        onWifiConnectStateChangedListener.obtainingIpAddress(ssid);
+                    }
+                }
+            }
+        });
+    }
+
+    private void performWifiConnectFailedListener(final String ssid) {
+        WifiManager.getHANDLER().post(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                    if (onWifiConnectStateChangedListener != null) {
+                        onWifiConnectStateChangedListener.connectFailed(ssid);
+                    }
+                }
+            }
+        });
+    }
+
+    private void performWifiConnectedListener(final String ssid) {
+        WifiManager.getHANDLER().post(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                    if (onWifiConnectStateChangedListener != null) {
+                        onWifiConnectStateChangedListener.connected(ssid);
+                    }
+                }
+            }
+        });
+    }
+
+    private void performWifiDisconnectingListener() {
+        WifiManager.getHANDLER().post(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                    if (onWifiConnectStateChangedListener != null) {
+                        onWifiConnectStateChangedListener.disconnecting();
+                    }
+                }
+            }
+        });
+    }
+
+    private void performWifiUnknownStateListener() {
+        WifiManager.getHANDLER().post(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                    if (onWifiConnectStateChangedListener != null) {
+                        onWifiConnectStateChangedListener.unknownStatus();
+                    }
+                }
+            }
+        });
+    }
+
+    private void performWifiDisconnectedListener() {
+        WifiManager.getHANDLER().post(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                    if (onWifiConnectStateChangedListener != null) {
+                        onWifiConnectStateChangedListener.disconnected();
+                    }
+                }
+            }
+        });
+    }
+
+    private void performWifiConnectingListener(final String ssid) {
+        WifiManager.getHANDLER().post(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                    if (onWifiConnectStateChangedListener != null) {
+                        onWifiConnectStateChangedListener.connecting(ssid);
+                    }
+                }
+            }
+        });
+    }
+
 }

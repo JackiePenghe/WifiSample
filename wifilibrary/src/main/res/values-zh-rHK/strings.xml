@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">WiFiLibrary</string>
     <string name="no_write_setting_permission">不能更改系統設置</string>
     <string name="no_write_setting_permission_message">沒有更改系統設置的許可權，程式可能無法創建WiFi熱點，是否同意程式獲取該許可權？（請先關閉該許可權開關，然後重新打開，如果授權之後還彈出此對話方塊，可以直接點擊取消按鈕跳過）</string>
     <string name="allow">允許</string>

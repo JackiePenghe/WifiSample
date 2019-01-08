@@ -2,7 +2,7 @@ package com.jackiepenghe.wifisample.ui.activities.guide;
 
 import android.content.Intent;
 
-import com.jackiepenghe.baselibrary.BaseSplashActivity;
+import com.jackiepenghe.baselibrary.activity.BaseSplashActivity;
 
 /**
  * @author jackie

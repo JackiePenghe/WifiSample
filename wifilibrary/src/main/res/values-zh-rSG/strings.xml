@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">WiFiLibrary</string>
     <string name="no_write_setting_permission">不能更改系统设置</string>
     <string name="no_write_setting_permission_message">没有更改系统设置的权限，程序可能无法创建WiFi热点，是否同意程序获取该权限？(请先关闭该权限开关，然后重新打开，如果授权之后还弹出此对话框，可以直接点击取消按钮跳过)</string>
     <string name="allow">允许</string>

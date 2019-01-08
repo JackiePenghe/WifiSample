@@ -6,8 +6,8 @@ android {
         applicationId "com.jackiepenghe.wifisample"
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 26
-        versionName "0.2.6"
+        versionCode 27
+        versionName "0.2.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -17,7 +17,7 @@ android {
         }
     }
 
-    lintOptions{
+    lintOptions {
         abortOnError false
     }
 }
@@ -25,6 +25,7 @@ android {
 dependencies {
     /*AS自动生成*/
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'junit:junit:4.12'
     //V7包
     implementation 'com.android.support:appcompat-v7:28.0.0'
@@ -33,7 +34,7 @@ dependencies {
     //WiFi库的Module
     implementation project(':wifilibrary')
     //常用基础库
-    implementation 'com.jackiepenghe:baselibrary:0.9.7'
+    implementation 'com.jackiepenghe:baselibrary:1.0.0-rc2'
     //动态权限库
     //noinspection GradleDependency
     implementation 'com.yanzhenjie:permission:2.0.0-rc12'

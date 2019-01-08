@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">WiFiLibrary</string>
     <string name="no_write_setting_permission">Cannot change system settings</string>
     <string name="no_write_setting_permission_message">We need the permission "change the system settings" to create WiFi hotspots.Please allow us to get this permission!(Please turn off the permission switch and turn it back on)</string>
     <string name="allow">Allow</string>

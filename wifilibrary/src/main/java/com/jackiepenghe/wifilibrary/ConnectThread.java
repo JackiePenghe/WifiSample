@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,7 +33,7 @@ public class ConnectThread extends Thread {
         this.socket = socket;
         this.ip = ip;
         this.wifiHotspotController = wifiHotspotController;
-        Tool.warnOut(TAG, "ConnectThread create:ip = " + ip);
+        DebugUtil.warnOut(TAG, "ConnectThread create:ip = " + ip);
     }
 
     @Override
@@ -62,7 +63,7 @@ public class ConnectThread extends Thread {
                     Bundle bundle = new Bundle();
                     bundle.putString("MSG", new String(data));
                     message.setData(bundle);
-                    Tool.warnOut(TAG + " " + ip, "读取到数据" + new String(data));
+                    DebugUtil.warnOut(TAG + " " + ip, "读取到数据" + new String(data));
                     if (onDataReceivedListener != null) {
                         handler.post(new Runnable() {
                             @Override
@@ -113,6 +114,7 @@ public class ConnectThread extends Thread {
     /**
      * 发送数据
      */
+    @SuppressWarnings("WeakerAccess")
     public boolean sendData(String msg) {
         if (outputStream != null) {
             try {
@@ -148,10 +150,12 @@ public class ConnectThread extends Thread {
      *
      * @param onDataRecievedListener 收到数据时进行的回调
      */
+    @SuppressWarnings("WeakerAccess")
     public void setOnDataReceivedListener(WifiHotspotController.OnDataReceivedListener onDataRecievedListener) {
         this.onDataReceivedListener = onDataRecievedListener;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void setKeepRun(boolean keepRun) {
         this.keepRun = keepRun;
     }
@@ -161,6 +165,7 @@ public class ConnectThread extends Thread {
      *
      * @return 当前连接对应的IP
      */
+    @SuppressWarnings("WeakerAccess")
     public String getIp() {
         return ip;
     }

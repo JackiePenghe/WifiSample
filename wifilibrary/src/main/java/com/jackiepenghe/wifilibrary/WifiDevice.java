@@ -8,13 +8,17 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.RequiresApi;
 
+import com.jackiepenghe.wifilibrary.enums.EncryptWay;
+
+import java.io.Serializable;
+
+
 /**
  * WiFi设备bean类
  *
  * @author jackie
  */
 public class WifiDevice implements Parcelable {
-
 
     /*---------------------------静态常量---------------------------*/
 
@@ -55,78 +59,6 @@ public class WifiDevice implements Parcelable {
     public WifiDevice(ScanResult scanResult, boolean hidden) {
         this.scanResult = scanResult;
         this.hidden = hidden;
-    }
-
-    /*---------------------------枚举定义---------------------------*/
-
-    /**
-     * 加密方式的枚举
-     */
-    public enum EncryptWay {
-        /**
-         * 未加密
-         */
-        NO_ENCRYPT(1),
-        /**
-         * WPA/WPA2加密
-         */
-        WPA_WPA2_ENCRYPT(2),
-        /**
-         * WEP加密
-         */
-        WEP_ENCRYPT(3),
-        /**
-         * 仅WPA加密
-         */
-        WPA_ENCRYPT(4),
-        /**
-         * PSK加密
-         */
-        EAP_ENCRYPT(5),
-        /**
-         * 仅WPA2加密
-         */
-        WPA2_ENCRYPT(6),
-        /**
-         * 未知加密方式
-         */
-        UNKNOWN__ENCRYPT(7);
-
-        int encryptWay;
-
-        EncryptWay(int encryptWay) {
-            this.encryptWay = encryptWay;
-        }
-
-        /**
-         * 获取当前的枚举的值
-         *
-         * @return 当前的枚举的值
-         */
-        @SuppressWarnings("unused")
-        public int getEncryptWayValue() {
-            return encryptWay;
-        }
-
-        /**
-         * 通过枚举的值来获取枚举对象
-         *
-         * @param encryptWayValue 枚举的值
-         * @return 枚举对象
-         */
-        @SuppressWarnings("unused")
-        public static EncryptWay getEncryptWayByValue(int encryptWayValue) {
-            switch (encryptWayValue) {
-                case 1:
-                    return EncryptWay.NO_ENCRYPT;
-                case 2:
-                    return EncryptWay.WPA_WPA2_ENCRYPT;
-                case 3:
-                    return EncryptWay.WEP_ENCRYPT;
-                default:
-                    return EncryptWay.UNKNOWN__ENCRYPT;
-            }
-        }
     }
 
     /*---------------------------getter---------------------------*/
@@ -251,6 +183,7 @@ public class WifiDevice implements Parcelable {
         return WifiManager.getEncryptionWay(scanResult);
     }
 
+
     @Override
     public int describeContents() {
         return 0;
@@ -266,9 +199,10 @@ public class WifiDevice implements Parcelable {
     protected WifiDevice(Parcel in) {
         this.scanResult = in.readParcelable(ScanResult.class.getClassLoader());
         this.hidden = in.readByte() != 0;
+        int tmpScanType = in.readInt();
     }
 
-    public static final Parcelable.Creator<WifiDevice> CREATOR = new Parcelable.Creator<WifiDevice>() {
+    public static final Creator<WifiDevice> CREATOR = new Creator<WifiDevice>() {
         @Override
         public WifiDevice createFromParcel(Parcel source) {
             return new WifiDevice(source);

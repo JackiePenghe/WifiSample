@@ -6,10 +6,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.jackiepenghe.baselibrary.BaseAppCompatActivity;
-import com.jackiepenghe.baselibrary.Tool;
+import com.jackiepenghe.baselibrary.activity.BaseAppCompatActivity;
+import com.jackiepenghe.baselibrary.tools.Tool;
 import com.jackiepenghe.wifilibrary.WifiHotspotController;
 import com.jackiepenghe.wifilibrary.WifiManager;
+import com.jackiepenghe.wifilibrary.intefaces.OnWifiHotspotStateChangedListener;
 import com.jackiepenghe.wifisample.R;
 
 /**
@@ -52,7 +53,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
             }
         }
     };
-    private WifiHotspotController.WifiHotspotCreateCallback wifiHotspotCreateCallback = new WifiHotspotController.WifiHotspotCreateCallback() {
+    private OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener = new OnWifiHotspotStateChangedListener() {
         @Override
         public void onWifiHotspotCreating(WifiConfiguration wifiConfiguration) {
             Tool.toastL(WifiHotspotActivity.this, "正在创建热点");
@@ -222,7 +223,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
         wifiHotspotController.setPort(65500);
         //这个监听函数所监听的数据来自于指定端口，该端口可通过wifiHotspotController.setPort(int port)进行设置（在热点创建成功之前，更改端口才可生效）
         wifiHotspotController.setOnDataReceivedListener(onDataReceivedListener);
-        wifiHotspotController.init(wifiHotspotCreateCallback);
+        wifiHotspotController.init(onWifiHotspotStateChangedListener);
     }
 
     /**
