@@ -10,8 +10,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 28
-        versionName "0.2.8"
+        versionCode 1
+        versionName "0.0.1"
 
     }
 
@@ -31,9 +31,9 @@ dependencies {
 version = "0.2.8"
 
 def siteUrl = 'https://github.com/JackiePenghe/WifiSample'
-def gitUrl = 'git@github.com:JackiePenghe/WifiSample.git'
+def gitUrl = 'https://github.com/JackiePenghe/WifiSample.git'
 
-group = "com.jackiepenghe"
+group = "com.sscl"
 
 install {
     repositories.mavenInstaller {
@@ -53,8 +53,8 @@ install {
 
                 developers {
                     developer {
-                        id 'jackiepenghe'
-                        name 'jackiepenghe'
+                        id 'sscl'
+                        name 'sscl'
                         email 'p15583101939@gmail.com'
                     }
                 }
@@ -107,7 +107,7 @@ bintray {
     pkg {
         repo = "maven"
         name = "wifilibrary"
-        userOrg = 'jackiepenghe'
+        userOrg = 'sscl'
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
