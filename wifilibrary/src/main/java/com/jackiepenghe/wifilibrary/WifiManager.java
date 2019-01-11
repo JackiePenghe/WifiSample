@@ -268,7 +268,6 @@ public class WifiManager {
      */
     public static void requestSystemSettingsPermissionRational(Activity activity, RequestPermissionResult requestPermissionResult) {
         checkInitStatus();
-//        showNoWriteSettingsPermissionDialog(activity, requestPermissionResult);
     }
 
     /**

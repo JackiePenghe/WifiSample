@@ -152,6 +152,9 @@ public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
      * @param onWifiConnectStateChangedListener WiFi连接的回调
      */
     public boolean addOnWifiConnectStateChangedListener(@NonNull OnWifiConnectStateChangedListener onWifiConnectStateChangedListener) {
+        if (onWifiConnectStateChangedListeners.contains(onWifiConnectStateChangedListener)){
+            return false;
+        }
         return onWifiConnectStateChangedListeners.add(onWifiConnectStateChangedListener);
     }
 
