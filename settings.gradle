@@ -1,1 +1,1 @@
-include ':app',":wifilibrary"
+include ':support', ':supportSample',':recyclerviewadapterhelperxlibrary', ':x', ':xsample'

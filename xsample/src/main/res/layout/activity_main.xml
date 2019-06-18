@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.activities.MainActivity">
+
+    <Button
+        android:id="@+id/wifi_hotspot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wifi_hotspot" />
+
+    <Button
+        android:id="@+id/wifi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wifi" />
+
+    <Button
+        android:id="@+id/receive_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/receive_file" />
+
+    <Button
+        android:id="@+id/send_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/send_file" />
+</LinearLayout>

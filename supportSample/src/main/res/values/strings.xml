@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">WifiSample</string>
+    <string name="permission_denied">Rejection of privileges may cause some functions to be unavailable</string>
+    <string name="request_permission">Request permission</string>
+    <string name="request_permission_message">Because you rejected the permission request last time, it may cause some functions of the program can not be used properly. Do you allow the program to re-request permission?</string>
+    <string name="wifi_hotspot">WiFi hotspot</string>
+    <string name="wifi">Standard WiFi usage</string>
+    <string name="start_search">Start search</string>
+    <string name="open_wifi">Enable WiFi</string>
+    <string name="close_wifi">Disable WiFi</string>
+    <string name="search_and_connect_wifi">Search and Connect WiFi</string>
+    <string name="create_hotspot">Creating WiFi Hotspots</string>
+    <string name="close_hotspot">Turn off WiFi Hotspots</string>
+    <string name="connecting">Connecting</string>
+    <string name="connect_success">Connect successfully, WiFi name:%1$s</string>
+    <string name="authenticating">Authenticating</string>
+    <string name="obtaining_ip_address">Getting IP Address</string>
+    <string name="connect_failed">Connection failed</string>
+    <string name="connected">Connected</string>
+    <string name="send_data">send data</string>
+    <string name="_null" />
+    <string name="search_finished">Scan finish</string>
+    <string name="level_1">Very strong</string>
+    <string name="level_2">strong</string>
+    <string name="level_3">commonly</string>
+    <string name="level_4">weak</string>
+    <string name="level_5">Very weak</string>
+    <string name="disconnected">Disconnect</string>
+    <string name="disconnecting">Disconnecting</string>
+    <string name="unknown_state">Unknown WiFi state</string>
+    <string name="connect_time_out">Connect timed out</string>
+    <string name="receive_file">Receive File</string>
+    <string name="send_file">Send File</string>
+    <string name="no_write_setting_permission">Cannot change system settings</string>
+    <string name="no_write_setting_permission_message">We need the permission "change the system settings" to create WiFi hotspots.Please allow us to get this permission!</string>
+</resources>

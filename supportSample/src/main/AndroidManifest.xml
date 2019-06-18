@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.sscl.supprot.wifisample">
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name="com.sscl.supprot.wifisample.MyApplication"
+        android:allowBackup="true"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme.NoActionBar">
+        <activity android:name="com.sscl.supprot.wifisample.ui.activities.guide.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.sscl.supprot.wifisample.ui.activities.guide.WelcomeActivity" />
+        <activity android:name="com.sscl.supprot.wifisample.ui.activities.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.sscl.supprot.wifisample.ui.activities.ReceiveFileActivity" />
+        <activity android:name="com.sscl.supprot.wifisample.ui.activities.SendFileActivity" />
+        <activity android:name="com.sscl.supprot.wifisample.ui.activities.WifiActivity" />
+        <activity android:name="com.sscl.supprot.wifisample.ui.activities.WifiHotspotActivity" />
+        <activity android:name="com.sscl.supprot.wifisample.ui.activities.WifiSearchActivity" />
+    </application>
+
+</manifest>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/wifi_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/edit_text"
+        android:hint="@string/input_wifi_ssid"
+        android:inputType="text"
+        tools:ignore="Autofill" />
+
+    <EditText
+        android:id="@+id/wifi_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/edit_text"
+        android:hint="@string/input_wifi_password"
+        android:inputType="textPassword"
+        tools:ignore="Autofill" />
+</LinearLayout>
