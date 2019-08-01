@@ -96,10 +96,13 @@ public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
         switch (action) {
             case android.net.wifi.WifiManager.NETWORK_STATE_CHANGED_ACTION:
                 NetworkInfo info = intent.getParcelableExtra(android.net.wifi.WifiManager.EXTRA_NETWORK_INFO);
-                if (info.getState().equals(NetworkInfo.State.DISCONNECTED)) {
+                if (info == null) {
+                    return;
+                }
+                if (info.getDetailedState().equals(NetworkInfo.DetailedState.DISCONNECTED)) {
                     performWifiDisconnectedListener();
 
-                } else if (info.getState().equals(NetworkInfo.State.CONNECTING)) {
+                } else if (info.getDetailedState().equals(NetworkInfo.DetailedState.CONNECTING)) {
                     WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                     if (wifiInfo == null) {
                         DebugUtil.warnOut(TAG, "wifiInfo == null");
@@ -116,8 +119,8 @@ public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
                     }
                     wifiConnector.onWifiConnected(wifiInfo.getSSID());
                     //获取当前wifi名称
-                    performWifiConnectedListener(wifiInfo.getSSID());
-                } else if (info.getState().equals(NetworkInfo.State.CONNECTED)) {
+                    performWifiConnectingListener(wifiInfo.getSSID());
+                } else if (info.getDetailedState().equals(NetworkInfo.DetailedState.CONNECTED)) {
                     WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                     NetworkInfo.DetailedState state = info.getDetailedState();
                     final String ssid = wifiInfo.getSSID();
@@ -133,9 +136,9 @@ public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
                     wifiConnector.onWifiConnected(ssid);
                     //获取当前wifi名称
                     performWifiConnectedListener(ssid);
-                } else if (info.getState().equals(NetworkInfo.State.DISCONNECTING)) {
+                } else if (info.getDetailedState().equals(NetworkInfo.DetailedState.DISCONNECTING)) {
                     performWifiDisconnectingListener();
-                } else if (info.getState().equals(NetworkInfo.State.UNKNOWN)) {
+                } else if (info.getDetailedState().equals(NetworkInfo.DetailedState.IDLE)) {
                     performWifiUnknownStateListener();
                 }
                 break;

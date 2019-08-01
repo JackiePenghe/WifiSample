@@ -428,7 +428,7 @@ public class WifiManager {
         else if (passType.toString().contains(wpaUpper)) {
             return EncryptWay.WPA_ENCRYPT;
         } else {
-            return EncryptWay.UNKNOWN__ENCRYPT;
+            return EncryptWay.UNKNOWN_ENCRYPT;
         }
 
     }
@@ -521,7 +521,7 @@ public class WifiManager {
      * @return 已连接的WiFi的SSID名称
      */
     @SuppressWarnings("unused")
-    public static String getConnectedWifiSSID() {
+    public static String getConnectedWifiSsid() {
         checkInitStatus();
         if (!isWifiEnabled()) {
             return null;

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WifiSample</string>
+    <string name="app_name">WifiSample x</string>
     <string name="permission_denied">Rejection of privileges may cause some functions to be unavailable</string>
     <string name="request_permission">Request permission</string>
     <string name="request_permission_message">Because you rejected the permission request last time, it may cause some functions of the program can not be used properly. Do you allow the program to re-request permission?</string>
@@ -18,7 +18,7 @@
     <string name="connect_failed">Connection failed</string>
     <string name="connected">Connected</string>
     <string name="send_data">send data</string>
-    <string name="_null" />
+    <string name="_null" translatable="false" />
     <string name="search_finished">Scan finish</string>
     <string name="level_1">Very strong</string>
     <string name="level_2">strong</string>
@@ -33,4 +33,7 @@
     <string name="send_file">Send File</string>
     <string name="no_write_setting_permission">Cannot change system settings</string>
     <string name="no_write_setting_permission_message">We need the permission "change the system settings" to create WiFi hotspots.Please allow us to get this permission!</string>
+    <string name="set_password">Set password</string>
+    <string name="password">Password</string>
+    <string name="password_too_short">Password too short!</string>
 </resources>

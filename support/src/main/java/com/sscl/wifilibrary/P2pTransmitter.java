@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.sscl.wifilibrary.bean.WifiDevice;
+import com.sscl.wifilibrary.enums.EncryptWay;
 import com.sscl.wifilibrary.intefaces.OnP2pTransmitterStateChangedListener;
 import com.sscl.wifilibrary.intefaces.OnWifiConnectStateChangedListener;
 import com.sscl.wifilibrary.intefaces.OnWifiScanStateChangedListener;
@@ -43,7 +44,7 @@ public class P2pTransmitter {
                 performConnectFailedListener();
                 return;
             }
-            wifiConnector.startConnect(WifiManager.getContext(), WifiConstants.HOT_SPOTS_NAME, WifiConstants.HOT_SPOTS_PASSWORD);
+            wifiConnector.connectNewWifi(WifiConstants.HOT_SPOTS_NAME, WifiConstants.HOT_SPOTS_PASSWORD, false, EncryptWay.WPA_WPA2_ENCRYPT, false);
         }
     };
     private OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = new OnWifiConnectStateChangedListener() {

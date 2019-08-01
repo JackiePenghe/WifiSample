@@ -3,16 +3,16 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <compositeConfiguration>
-          <compositeBuild compositeDefinitionSource="SCRIPT" />
-        </compositeConfiguration>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/wifilibrary" />
+            <option value="$PROJECT_DIR$/recyclerviewadapterhelperxlibrary" />
+            <option value="$PROJECT_DIR$/support" />
+            <option value="$PROJECT_DIR$/supportSample" />
+            <option value="$PROJECT_DIR$/x" />
+            <option value="$PROJECT_DIR$/xsample" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

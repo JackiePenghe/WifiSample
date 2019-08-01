@@ -31,7 +31,7 @@ public enum EncryptWay {
     /**
      * 未知加密方式
      */
-    UNKNOWN__ENCRYPT(7);
+    UNKNOWN_ENCRYPT(7);
 
     int encryptWay;
 
@@ -55,7 +55,7 @@ public enum EncryptWay {
             case 3:
                 return EncryptWay.WEP_ENCRYPT;
             default:
-                return EncryptWay.UNKNOWN__ENCRYPT;
+                return EncryptWay.UNKNOWN_ENCRYPT;
         }
     }
 

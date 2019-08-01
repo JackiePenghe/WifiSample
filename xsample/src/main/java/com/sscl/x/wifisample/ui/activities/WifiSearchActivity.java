@@ -1,11 +1,13 @@
 package com.sscl.x.wifisample.ui.activities;
 
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -22,6 +24,7 @@ import com.sscl.wifilibrary.WifiConnector;
 import com.sscl.wifilibrary.WifiManager;
 import com.sscl.wifilibrary.WifiScanner;
 import com.sscl.wifilibrary.bean.WifiDevice;
+import com.sscl.wifilibrary.enums.EncryptWay;
 import com.sscl.wifilibrary.intefaces.OnWifiConnectStateChangedListener;
 import com.sscl.wifilibrary.intefaces.OnWifiScanStateChangedListener;
 import com.sscl.x.wifisample.R;
@@ -38,6 +41,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     /*---------------------------静态常量---------------------------*/
 
     private static final String TAG = WifiSearchActivity.class.getSimpleName();
+    private static final int WIFI_PASSWORD_MIN_LENGTH = 8;
 
     /*---------------------------成员变量---------------------------*/
 
@@ -419,6 +423,36 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     }
 
     private void startConnect(WifiDevice wifiDevice) {
-        wifiConnector.startConnect(WifiSearchActivity.this, wifiDevice);
+        if (wifiConnector.isContainswifi(wifiDevice.getSSID())) {
+            wifiConnector.connectExistsWifi(wifiDevice.getSSID(), true);
+        } else {
+            EncryptWay encryptWay = wifiDevice.getEncryptWay();
+            if (encryptWay == EncryptWay.NO_ENCRYPT) {
+                wifiConnector.connectNewWifi(wifiDevice.getSSID(), null, false, encryptWay, true);
+            } else {
+                showSetPasswordDialog(wifiDevice);
+            }
+        }
+    }
+
+    private void showSetPasswordDialog(final WifiDevice wifiDevice) {
+        final EditText editText = (EditText) View.inflate(this, R.layout.password_edit_text, null);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.set_password)
+                .setView(editText)
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        String password = editText.getText().toString();
+                        if (password.length() < WIFI_PASSWORD_MIN_LENGTH) {
+                            ToastUtil.toastL(WifiSearchActivity.this, R.string.password_too_short);
+                            showSetPasswordDialog(wifiDevice);
+                            return;
+                        }
+                        wifiConnector.connectNewWifi(wifiDevice.getSSID(), password, false, wifiDevice.getEncryptWay(), false);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 }
