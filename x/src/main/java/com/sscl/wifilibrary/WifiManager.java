@@ -18,6 +18,7 @@ import com.sscl.wifilibrary.enums.EncryptWay;
 import com.sscl.wifilibrary.intefaces.OnWifiStateChangedListener;
 import com.sscl.wifilibrary.x.R;
 
+import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -29,6 +30,16 @@ import java.util.concurrent.ThreadFactory;
 public class WifiManager {
 
     /*---------------------------静态常量---------------------------*/
+
+    private static ArrayList<P2pReceiver> p2pReceivers = new ArrayList<>();
+
+    private static ArrayList<P2pTransmitter> p2pTransmitters = new ArrayList<>();
+
+    private static ArrayList<WifiHotspotController> wifiHotspotControllers = new ArrayList<>();
+
+    private static ArrayList<WifiScanner> wifiScanners = new ArrayList<>();
+
+    private static ArrayList<WifiConnector> wifiConnectors = new ArrayList<>();
 
     /**
      * 线程工厂
@@ -136,7 +147,9 @@ public class WifiManager {
      */
     public static WifiHotspotController newWifiHotspotController() {
         checkInitStatus();
-        return new WifiHotspotController();
+        WifiHotspotController wifiHotspotController = new WifiHotspotController();
+        wifiHotspotControllers.add(wifiHotspotController);
+        return wifiHotspotController;
     }
 
     public static WifiScanner getWifiScannerInstance() {
@@ -153,7 +166,9 @@ public class WifiManager {
 
     public static WifiScanner newWifiScannerInstance() {
         checkInitStatus();
-        return new WifiScanner();
+        WifiScanner wifiScanner = new WifiScanner();
+        wifiScanners.add(wifiScanner);
+        return wifiScanner;
     }
 
     public static WifiConnector getWifiConnectorInstance() {
@@ -170,13 +185,15 @@ public class WifiManager {
 
     public static WifiConnector newWifiConnectorInstance() {
         checkInitStatus();
-        return new WifiConnector();
+        WifiConnector wifiConnector = new WifiConnector();
+        wifiConnectors.add(wifiConnector);
+        return wifiConnector;
     }
 
     /**
      * 释放Wifi热点创建器
      */
-    public static void releaseWifiHotspotCreator() {
+    public static void releaseWifiHotspotController() {
         checkInitStatus();
         if (wifiHotspotController != null) {
             if (wifiHotspotController.isWifiApEnabled()) {
@@ -228,7 +245,36 @@ public class WifiManager {
      */
     public static void releaseAll() {
         checkInitStatus();
-        releaseWifiHotspotCreator();
+        releaseWifiHotspotController();
+        for (int i = 0; i < wifiHotspotControllers.size(); i++) {
+            WifiHotspotController wifiHotspotController = wifiHotspotControllers.get(i);
+            wifiHotspotController.close();
+        }
+        wifiHotspotControllers.clear();
+        releaseWifiConnector();
+        for (int i = 0; i < wifiConnectors.size(); i++) {
+            WifiConnector wifiConnector = wifiConnectors.get(i);
+            wifiConnector.close();
+        }
+        wifiConnectors.clear();
+        releaseP2pRecevier();
+        for (int i = 0; i < p2pReceivers.size(); i++) {
+            P2pReceiver p2pReceiver = p2pReceivers.get(i);
+            p2pReceiver.close();
+        }
+        p2pReceivers.clear();
+        releaseP2pTransmitter();
+        for (int i = 0; i < p2pTransmitters.size(); i++) {
+            P2pTransmitter p2pTransmitter = p2pTransmitters.get(i);
+            p2pTransmitter.close();
+        }
+        p2pTransmitters.clear();
+        releaseWifiScanner();
+        for (int i = 0; i < wifiScanners.size(); i++) {
+            WifiScanner wifiScanner = wifiScanners.get(i);
+            wifiScanner.close();
+        }
+        wifiScanners.clear();
         try {
             context.unregisterReceiver(wifiStatusBroadcastReceiver);
         } catch (Exception e) {
@@ -328,6 +374,7 @@ public class WifiManager {
     }
 
     public static P2pReceiver getP2pReceiverInstance() {
+        checkInitStatus();
         if (p2pReceiver == null) {
             synchronized (WifiManager.class) {
                 if (p2pReceiver == null) {
@@ -339,10 +386,14 @@ public class WifiManager {
     }
 
     public static P2pReceiver newP2pReceiverInstance() {
-        return new P2pReceiver();
+        checkInitStatus();
+        P2pReceiver p2pReceiver = new P2pReceiver();
+        p2pReceivers.add(p2pReceiver);
+        return p2pReceiver;
     }
 
     public static P2pTransmitter getP2pTransmitterInstance() {
+        checkInitStatus();
         if (p2pTransmitter == null) {
             synchronized (WifiManager.class) {
                 if (p2pTransmitter == null) {
@@ -354,7 +405,10 @@ public class WifiManager {
     }
 
     public static P2pTransmitter newP2pTransmitterInstance() {
-        return new P2pTransmitter();
+        checkInitStatus();
+        P2pTransmitter p2pTransmitter = new P2pTransmitter();
+        p2pTransmitters.add(p2pTransmitter);
+        return p2pTransmitter;
     }
 
     /**

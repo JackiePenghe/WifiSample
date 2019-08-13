@@ -255,7 +255,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
         if (wifiHotspotController.isWifiApEnabled()) {
             wifiHotspotController.close();
         }
-        WifiManager.releaseWifiHotspotCreator();
+        WifiManager.releaseWifiHotspotController();
     }
 
     /*---------------------------私有方法---------------------------*/

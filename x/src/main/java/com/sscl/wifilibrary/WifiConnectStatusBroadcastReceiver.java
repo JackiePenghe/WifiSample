@@ -209,7 +209,8 @@ public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
             @Override
             public void run() {
                 for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
-                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                    OnWifiConnectStateChangedListener onWifiConnectStateChangedListener =
+                            onWifiConnectStateChangedListeners.get(i);
                     if (onWifiConnectStateChangedListener != null) {
                         onWifiConnectStateChangedListener.connectFailed(ssid);
                     }

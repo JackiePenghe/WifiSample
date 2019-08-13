@@ -45,7 +45,7 @@ public class WifiConnector {
                 performWifiConnectedListener(ssid);
                 return;
             }
-            WifiManager.getSystemWifiManager().disconnect();
+            systemWifiManager.disconnect();
             WifiConfiguration wifiConfiguration = createWifiConfiguration(ssid, password, encryptWay, isHidden);
             connect(wifiConfiguration);
         }
@@ -64,7 +64,6 @@ public class WifiConnector {
     }
 
     public void forgetNetwork(String ssid) {
-        android.net.wifi.WifiManager systemWifiManager = WifiManager.getSystemWifiManager();
         Context context = WifiManager.getContext();
         int checkSelfPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_WIFI_STATE);
         if (checkSelfPermission == PackageManager.PERMISSION_GRANTED) {
@@ -126,7 +125,7 @@ public class WifiConnector {
         Context context = WifiManager.getContext();
         int checkSelfPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_WIFI_STATE);
         if (checkSelfPermission == PackageManager.PERMISSION_GRANTED) {
-            List<WifiConfiguration> existingConfigs = WifiManager.getSystemWifiManager().getConfiguredNetworks();
+            List<WifiConfiguration> existingConfigs = systemWifiManager.getConfiguredNetworks();
             for (WifiConfiguration existingConfig : existingConfigs) {
                 if (WifiManager.isWifiSsidEquals(existingConfig.SSID, ssid)) {
                     return existingConfig.networkId;
@@ -232,12 +231,12 @@ public class WifiConnector {
      * @param config WiFi配置数据
      */
     private void connect(WifiConfiguration config) {
-        int network = WifiManager.getSystemWifiManager().addNetwork(config);
+        int network = systemWifiManager.addNetwork(config);
         if (network == -1) {
             performWifiConnectFailedListener(config.SSID);
             return;
         }
-        boolean enableNetwork = WifiManager.getSystemWifiManager().enableNetwork(network, true);
+        boolean enableNetwork = systemWifiManager.enableNetwork(network, true);
         if (enableNetwork) {
             performWifiConnectingListener(config.SSID);
         } else {

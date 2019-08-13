@@ -254,7 +254,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
         if (wifiHotspotController.isWifiApEnabled()) {
             wifiHotspotController.close();
         }
-        WifiManager.releaseWifiHotspotCreator();
+        WifiManager.releaseWifiHotspotController();
     }
 
     /*---------------------------私有方法---------------------------*/
@@ -265,7 +265,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
     private void initWifiHotspotCreator() {
         wifiHotspotController = WifiManager.getWifiHotspotControllerInstance();
         wifiHotspotController.setPort(65500);
-        //这个监听函数所监听的数据来自于指定端口，该端口可通过wifiHotspotController.setPort(int port)进行设置（在热点创建成功之前，更改端口才可生效）
+        //这个监听函数所监听的数据来自于指定端口，该端口可通过wifiHotspotController.setPort(int port)进行设置（更改端口在热点创建之前才会生效）
         wifiHotspotController.setOnDataReceivedListener(onDataReceivedListener);
         wifiHotspotController.init(onWifiHotspotStateChangedListener);
     }
