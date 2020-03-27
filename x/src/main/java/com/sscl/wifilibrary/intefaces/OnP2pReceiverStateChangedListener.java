@@ -11,6 +11,7 @@ import java.util.ArrayList;
  *
  * @author jackie
  */
+@SuppressWarnings("deprecation")
 public interface OnP2pReceiverStateChangedListener {
 
     /**

@@ -7,6 +7,7 @@ import android.net.wifi.WifiConfiguration;
  *
  * @author jackie
  */
+@SuppressWarnings("deprecation")
 public interface OnWifiHotspotStateChangedListener {
     /**
      * 热点正在创建

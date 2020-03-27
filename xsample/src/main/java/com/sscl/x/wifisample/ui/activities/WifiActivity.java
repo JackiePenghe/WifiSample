@@ -6,6 +6,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
+
 import com.sscl.baselibrary.activity.BaseAppCompatActivity;
 import com.sscl.wifilibrary.WifiManager;
 import com.sscl.x.wifisample.R;
@@ -139,7 +141,7 @@ public class WifiActivity extends BaseAppCompatActivity {
      * @return 只是重写 public boolean onCreateOptionsMenu(Menu menu)
      */
     @Override
-    protected boolean createOptionsMenu(Menu menu) {
+    protected boolean createOptionsMenu(@NonNull Menu menu) {
         return false;
     }
 
@@ -150,7 +152,7 @@ public class WifiActivity extends BaseAppCompatActivity {
      * @return true表示处理了监听事件
      */
     @Override
-    protected boolean optionsItemSelected(MenuItem item) {
+    protected boolean optionsItemSelected(@NonNull MenuItem item) {
         return false;
     }
 

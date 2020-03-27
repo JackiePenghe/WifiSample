@@ -5,8 +5,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.sscl.baselibrary.activity.BaseAppCompatActivity;
-import com.sscl.wifilibrary.P2pTransmitter;
+import com.sscl.wifilibrary.DataTransmitter;
 import com.sscl.wifilibrary.WifiManager;
 import com.sscl.wifilibrary.intefaces.OnP2pTransmitterStateChangedListener;
 import com.sscl.x.wifisample.R;
@@ -18,7 +20,7 @@ import com.sscl.x.wifisample.R;
  */
 public class SendFileActivity extends BaseAppCompatActivity {
 
-    private P2pTransmitter p2pTransmitter;
+    private DataTransmitter dataTransmitter;
     private TextView stateTextView;
     private OnP2pTransmitterStateChangedListener onP2pTransmitterStateChangedListener = new OnP2pTransmitterStateChangedListener() {
         @SuppressLint("SetTextI18n")
@@ -79,6 +81,11 @@ public class SendFileActivity extends BaseAppCompatActivity {
         @Override
         public void connectTime() {
             stateTextView.setText("connectTime");
+        }
+
+        @Override
+        public void searchedNothing() {
+            stateTextView.setText("searchedNothing");
         }
     };
 
@@ -153,7 +160,7 @@ public class SendFileActivity extends BaseAppCompatActivity {
      */
     @Override
     protected void doAfterAll() {
-        p2pTransmitter.connect();
+        dataTransmitter.connect();
     }
 
     /**
@@ -163,7 +170,7 @@ public class SendFileActivity extends BaseAppCompatActivity {
      * @return 只是重写 public boolean onCreateOptionsMenu(Menu menu)
      */
     @Override
-    protected boolean createOptionsMenu(Menu menu) {
+    protected boolean createOptionsMenu(@NonNull Menu menu) {
         return false;
     }
 
@@ -174,12 +181,12 @@ public class SendFileActivity extends BaseAppCompatActivity {
      * @return true表示处理了监听事件
      */
     @Override
-    protected boolean optionsItemSelected(MenuItem item) {
+    protected boolean optionsItemSelected(@NonNull MenuItem item) {
         return false;
     }
 
     private void initP2pTransmitter() {
-        p2pTransmitter = WifiManager.getP2pTransmitterInstance();
-        p2pTransmitter.setOnP2pTransmitterStateChangedListener(onP2pTransmitterStateChangedListener);
+        dataTransmitter = WifiManager.getDataTransmitterInstance();
+        dataTransmitter.setOnP2pTransmitterStateChangedListener(onP2pTransmitterStateChangedListener);
     }
 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 /**
  * @author jackie
  */
+@SuppressWarnings("deprecation")
 public class WifiConnectStatusBroadcastReceiver extends BroadcastReceiver {
 
     /*---------------------------静态常量---------------------------*/

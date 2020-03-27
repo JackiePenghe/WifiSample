@@ -9,6 +9,7 @@ import com.sscl.wifilibrary.intefaces.OnWifiHotspotStateChangedListener;
 /**
  * @author jackie
  */
+@SuppressWarnings("deprecation")
 public final class DefaultOnWifiHotspotStateChangedListener implements OnWifiHotspotStateChangedListener {
 
     /*------------------------静态常量----------------------------*/

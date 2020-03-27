@@ -5,11 +5,11 @@ import android.graphics.Color;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.sscl.baselibrary.activity.BaseAppCompatActivity;
 import com.sscl.baselibrary.utils.DebugUtil;
+import com.sscl.baselibrary.utils.DefaultItemDecoration;
 import com.sscl.baselibrary.utils.ToastUtil;
-import com.sscl.baselibrary.view.utils.DefaultItemDecoration;
 import com.sscl.wifilibrary.WifiConnector;
 import com.sscl.wifilibrary.WifiManager;
 import com.sscl.wifilibrary.WifiScanner;
@@ -112,7 +112,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
             DebugUtil.warnOut(TAG, "已连接");
             textView.setText(R.string.connected);
             String text = getString(R.string.connect_success, ssid);
-            ToastUtil.toastL(WifiSearchActivity.this, text);
+            ToastUtil.toastLong(WifiSearchActivity.this, text);
             if (alertDialog == null) {
                 return;
             }
@@ -192,7 +192,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
         @Override
         public void cancelConnect(String ssid) {
             DebugUtil.warnOut(TAG, "用户取消了本次连接");
-            ToastUtil.toastL(WifiSearchActivity.this, "取消连接 SSID:" + ssid);
+            ToastUtil.toastLong(WifiSearchActivity.this, "取消连接 SSID:" + ssid);
 
         }
 
@@ -239,12 +239,12 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     private OnWifiScanStateChangedListener onWifiScanStateChangedListener = new OnWifiScanStateChangedListener() {
         @Override
         public void startScanFailed() {
-            ToastUtil.toastL(WifiSearchActivity.this, "扫描开启失败");
+            ToastUtil.toastLong(WifiSearchActivity.this, "扫描开启失败");
         }
 
         @Override
         public void isScanning() {
-            ToastUtil.toastL(WifiSearchActivity.this, "扫描已开启，正在扫描");
+            ToastUtil.toastLong(WifiSearchActivity.this, "扫描已开启，正在扫描");
         }
 
         @Override
@@ -253,11 +253,11 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
                 return;
             }
             DebugUtil.warnOut(TAG, "扫描结果已获取");
-            ToastUtil.toastL(WifiSearchActivity.this, R.string.search_finished);
+            ToastUtil.toastLong(WifiSearchActivity.this, R.string.search_finished);
             int size = wifiDevices.size();
             if (size == 0) {
                 DebugUtil.warnOut(TAG, "没有搜索到任何WiFi");
-                ToastUtil.toastL(WifiSearchActivity.this, "没有搜索到任何WiFi");
+                ToastUtil.toastLong(WifiSearchActivity.this, "没有搜索到任何WiFi");
                 return;
             }
 
@@ -360,7 +360,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      * @return 只是重写 public boolean onCreateOptionsMenu(Menu menu)
      */
     @Override
-    protected boolean createOptionsMenu(Menu menu) {
+    protected boolean createOptionsMenu(@NonNull Menu menu) {
         return false;
     }
 
@@ -371,7 +371,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      * @return true表示处理了监听事件
      */
     @Override
-    protected boolean optionsItemSelected(MenuItem item) {
+    protected boolean optionsItemSelected(@NonNull MenuItem item) {
         return false;
     }
 
@@ -416,7 +416,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
     private void initRecyclerView() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(WifiSearchActivity.this);
         recyclerView.setLayoutManager(linearLayoutManager);
-        DefaultItemDecoration defaultItemDecoration = new DefaultItemDecoration(Color.GRAY, ViewGroup.LayoutParams.MATCH_PARENT, 1, -1);
+        DefaultItemDecoration defaultItemDecoration = DefaultItemDecoration.newLine(Color.GRAY);
         recyclerView.addItemDecoration(defaultItemDecoration);
         wifiScanResultAdapter.setOnItemClickListener(onItemClickListener);
         recyclerView.setAdapter(wifiScanResultAdapter);
@@ -445,7 +445,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int which) {
                         String password = editText.getText().toString();
                         if (password.length() < WIFI_PASSWORD_MIN_LENGTH) {
-                            ToastUtil.toastL(WifiSearchActivity.this, R.string.password_too_short);
+                            ToastUtil.toastLong(WifiSearchActivity.this, R.string.password_too_short);
                             showSetPasswordDialog(wifiDevice);
                             return;
                         }

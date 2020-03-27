@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.3"
 
 
     defaultConfig {
@@ -12,7 +12,7 @@ android {
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -28,19 +28,19 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.1.0-beta01'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     //RecyclerView库
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     //常用基础库
-    implementation 'com.sscl.baselibrary:x:0.0.3'
+    implementation 'com.sscl:baselibrary:0.0.34'
     //Androidx WiFi库
     implementation project(path: ':x')
     //RecyclerView适配器
-    implementation project(path: ':recyclerviewadapterhelperxlibrary')
+    implementation 'com.sscl:brvahlibrary:0.0.1'
     //多分包支持库
     implementation 'androidx.multidex:multidex:2.0.1'
     //动态权限库

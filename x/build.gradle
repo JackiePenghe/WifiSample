@@ -3,18 +3,17 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 android {
-    compileSdkVersion 28
-    buildToolsVersion "28.0.3"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
 
 
     defaultConfig {
         minSdkVersion 18
-        //noinspection OldTargetApi
-        targetSdkVersion 28
-        versionCode 3
-        versionName "0.0.3"
+        targetSdkVersion 29
+        versionCode 4
+        versionName "0.0.4"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -29,14 +28,14 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
 
 
-version = "0.0.3"
+version = "0.0.4"
 
 def siteUrl = 'https://github.com/JackiePenghe/WifiSample'
 def gitUrl = 'https://github.com/JackiePenghe/WifiSample.git'
@@ -79,6 +78,7 @@ install {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
+    //noinspection GrDeprecatedAPIUsage
     classifier = 'sources'
 }
 
@@ -97,6 +97,7 @@ task javadoc(type: Javadoc) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
+    //noinspection GrDeprecatedAPIUsage
     classifier = 'javadoc'
     from javadoc.destinationDir
 }

@@ -99,7 +99,6 @@ public class WifiDevice implements Parcelable {
         return "\"" + scanResult.SSID + "\"";
     }
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isHidden() {
         return hidden;
     }

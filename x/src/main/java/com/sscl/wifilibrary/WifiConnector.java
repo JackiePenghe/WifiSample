@@ -19,7 +19,10 @@ import java.util.List;
 /**
  * @author jackie
  */
+@SuppressWarnings("deprecation")
 public class WifiConnector {
+
+    private static final String TAG = WifiConnector.class.getSimpleName();
 
     private WifiConnectStatusBroadcastReceiver wifiConnectStatusBroadcastReceiver = new WifiConnectStatusBroadcastReceiver(this);
     private ArrayList<OnWifiConnectStateChangedListener> onWifiConnectStateChangedListeners = new ArrayList<>();
@@ -41,6 +44,7 @@ public class WifiConnector {
             }
         } else {
             String connectedWifiSsid = WifiManager.getConnectedWifiSsid();
+            DebugUtil.warnOut(TAG, "connectedWifiSsid = " + connectedWifiSsid);
             if (connectedWifiSsid != null && WifiManager.isWifiSsidEquals(connectedWifiSsid, ssid)) {
                 performWifiConnectedListener(ssid);
                 return;

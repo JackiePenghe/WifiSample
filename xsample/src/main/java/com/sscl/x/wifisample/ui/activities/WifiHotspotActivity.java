@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import com.sscl.baselibrary.activity.BaseAppCompatActivity;
@@ -25,6 +26,7 @@ import com.yanzhenjie.permission.RequestExecutor;
 /**
  * @author jackie
  */
+@SuppressWarnings("deprecation")
 public class WifiHotspotActivity extends BaseAppCompatActivity {
 
     private static final String TAG = WifiHotspotActivity.class.getSimpleName();
@@ -46,32 +48,32 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
     private OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener = new OnWifiHotspotStateChangedListener() {
         @Override
         public void onWifiHotspotCreating(WifiConfiguration wifiConfiguration) {
-            ToastUtil.toastL(WifiHotspotActivity.this, "正在创建热点");
+            ToastUtil.toastLong(WifiHotspotActivity.this, "正在创建热点");
         }
 
         @Override
         public void onWifiHotspotCreated(WifiConfiguration wifiConfiguration) {
-            ToastUtil.toastL(WifiHotspotActivity.this, "创建热点成功");
+            ToastUtil.toastLong(WifiHotspotActivity.this, "创建热点成功");
         }
 
         @Override
         public void onWifiHotspotCreateFailed(WifiConfiguration wifiConfiguration) {
-            ToastUtil.toastL(WifiHotspotActivity.this, "创建热点失败");
+            ToastUtil.toastLong(WifiHotspotActivity.this, "创建热点失败");
         }
 
         @Override
         public void onWifiHotspotClosing() {
-            ToastUtil.toastL(WifiHotspotActivity.this, "正在关闭热点");
+            ToastUtil.toastLong(WifiHotspotActivity.this, "正在关闭热点");
         }
 
         @Override
         public void onWifiHotspotClosed(WifiConfiguration wifiConfiguration) {
-            ToastUtil.toastL(WifiHotspotActivity.this, "热点关闭成功");
+            ToastUtil.toastLong(WifiHotspotActivity.this, "热点关闭成功");
         }
 
         @Override
         public void onWifiHotspotCloseFailed(WifiConfiguration wifiConfiguration) {
-            ToastUtil.toastL(WifiHotspotActivity.this, "热点关闭失败");
+            ToastUtil.toastLong(WifiHotspotActivity.this, "热点关闭失败");
         }
     };
     /**
@@ -97,7 +99,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
     private Action<Void> onDeniedListener = new Action<Void>() {
         @Override
         public void onAction(Void data) {
-            ToastUtil.toastL(WifiHotspotActivity.this, "没有权限，热点创建失败！");
+            ToastUtil.toastLong(WifiHotspotActivity.this, "没有权限，热点创建失败！");
         }
     };
     private Rationale<Void> rationaleListener = new Rationale<Void>() {
@@ -228,7 +230,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
      * @return 只是重写 public boolean onCreateOptionsMenu(Menu menu)
      */
     @Override
-    protected boolean createOptionsMenu(Menu menu) {
+    protected boolean createOptionsMenu(@NonNull Menu menu) {
         return false;
     }
 
@@ -239,7 +241,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
      * @return true表示处理了监听事件
      */
     @Override
-    protected boolean optionsItemSelected(MenuItem item) {
+    protected boolean optionsItemSelected(@NonNull MenuItem item) {
         return false;
     }
 
@@ -279,7 +281,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
         if (WifiManager.isWifiEnabled()) {
             boolean result = WifiManager.enableWifi(false);
             if (!result) {
-                ToastUtil.toastL(WifiHotspotActivity.this, "创建WiFi热点时需要关闭WiFi。请关闭WiFi后重试！");
+                ToastUtil.toastLong(WifiHotspotActivity.this, "创建WiFi热点时需要关闭WiFi。请关闭WiFi后重试！");
                 return;
             }
         }
@@ -301,7 +303,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
         if (wifiHotspotController.isWifiApEnabled()) {
             wifiHotspotController.close();
         } else {
-            ToastUtil.toastL(WifiHotspotActivity.this, "WiFi热点未创建，不需要关闭");
+            ToastUtil.toastLong(WifiHotspotActivity.this, "WiFi热点未创建，不需要关闭");
         }
     }
 }

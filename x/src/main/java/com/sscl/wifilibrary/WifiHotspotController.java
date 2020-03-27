@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadFactory;
 /**
  * @author jackie
  */
+@SuppressWarnings("deprecation")
 public class WifiHotspotController {
 
     /*---------------------------静态常量---------------------------*/
@@ -209,6 +210,7 @@ public class WifiHotspotController {
      * @param onWifiHotspotStateChangedListener        WiFi连接的回调
      * @param onWifiHotspotIsConnectedByOthersListener WiFi热点被连接时的回调
      */
+    @SuppressWarnings("WeakerAccess")
     public void init(String ssidName, String preSharedKey, int keyMgmt, @NonNull OnWifiHotspotStateChangedListener onWifiHotspotStateChangedListener,
                      @NonNull OnWifiHotspotIsConnectedByOthersListener onWifiHotspotIsConnectedByOthersListener) {
         init(ssidName, preSharedKey, false, false, keyMgmt, onWifiHotspotStateChangedListener, onWifiHotspotIsConnectedByOthersListener);

@@ -56,4 +56,9 @@ public interface OnP2pTransmitterStateChangedListener {
      * 连接超时
      */
     void connectTime();
+
+    /**
+     * 未搜索到可连接的传输WiFi
+     */
+    void searchedNothing();
 }

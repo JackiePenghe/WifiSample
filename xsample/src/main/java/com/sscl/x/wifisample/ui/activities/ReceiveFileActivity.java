@@ -7,12 +7,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sscl.baselibrary.activity.BaseAppCompatActivity;
-import com.sscl.baselibrary.view.utils.DefaultItemDecoration;
-import com.sscl.wifilibrary.P2pReceiver;
+import com.sscl.baselibrary.utils.DefaultItemDecoration;
+import com.sscl.wifilibrary.DataReceiver;
 import com.sscl.wifilibrary.WifiManager;
 import com.sscl.wifilibrary.bean.ConnectedDevice;
 import com.sscl.wifilibrary.intefaces.OnP2pReceiverStateChangedListener;
@@ -26,11 +27,12 @@ import java.util.ArrayList;
  *
  * @author jackie
  */
+@SuppressWarnings("deprecation")
 public class ReceiveFileActivity extends BaseAppCompatActivity {
 
     private ArrayList<ConnectedDevice> connectedDevices = new ArrayList<>();
     private ConnectedDeviceRecyclerViewAdapter connectedDeviceRecyclerViewAdapter = new ConnectedDeviceRecyclerViewAdapter(connectedDevices);
-    private DefaultItemDecoration defaultItemDecoration = DefaultItemDecoration.getDefaultItemDecoration(Color.GRAY, DefaultItemDecoration.ORIENTATION_VERTICAL);
+    private DefaultItemDecoration defaultItemDecoration = DefaultItemDecoration.newLine(Color.GRAY);
     /**
      * 显示当前状态的文本框
      */
@@ -96,7 +98,7 @@ public class ReceiveFileActivity extends BaseAppCompatActivity {
     /**
      * P2P接收器
      */
-    private P2pReceiver p2pReceiver;
+    private DataReceiver dataReceiver;
     /**
      * 显示已经连接的设备的列表
      */
@@ -174,7 +176,7 @@ public class ReceiveFileActivity extends BaseAppCompatActivity {
      */
     @Override
     protected void doAfterAll() {
-        p2pReceiver.startReceiverListener();
+        dataReceiver.startReceiverListener();
     }
 
     /**
@@ -184,7 +186,7 @@ public class ReceiveFileActivity extends BaseAppCompatActivity {
      * @return 只是重写 public boolean onCreateOptionsMenu(Menu menu)
      */
     @Override
-    protected boolean createOptionsMenu(Menu menu) {
+    protected boolean createOptionsMenu(@NonNull Menu menu) {
         return false;
     }
 
@@ -195,19 +197,19 @@ public class ReceiveFileActivity extends BaseAppCompatActivity {
      * @return true表示处理了监听事件
      */
     @Override
-    protected boolean optionsItemSelected(MenuItem item) {
+    protected boolean optionsItemSelected(@NonNull MenuItem item) {
         return false;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        p2pReceiver.close();
+        dataReceiver.close();
     }
 
     private void initP2pReceiver() {
-        p2pReceiver = WifiManager.getP2pReceiverInstance();
-        p2pReceiver.setOnP2PReceiverStateChangedListener(onP2PReceiverStateChangedListener);
+        dataReceiver = WifiManager.getDataReceiverInstance();
+        dataReceiver.setOnP2PReceiverStateChangedListener(onP2PReceiverStateChangedListener);
     }
 
     private void initRecyclerViewData() {

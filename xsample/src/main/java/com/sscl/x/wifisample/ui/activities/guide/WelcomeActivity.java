@@ -64,7 +64,7 @@ public class WelcomeActivity extends BaseWelcomeActivity {
     private Action<List<String>> deniedAction = new Action<List<String>>() {
         @Override
         public void onAction(List<String> permissions) {
-            ToastUtil.toastL(WelcomeActivity.this, R.string.permission_denied);
+            ToastUtil.toastLong(WelcomeActivity.this, R.string.permission_denied);
             toNext();
         }
     };

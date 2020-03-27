@@ -26,14 +26,14 @@ import java.util.concurrent.ThreadFactory;
 /**
  * @author jackie
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "deprecation"})
 public class WifiManager {
 
     /*---------------------------静态常量---------------------------*/
 
-    private static ArrayList<P2pReceiver> p2pReceivers = new ArrayList<>();
+    private static ArrayList<DataReceiver> dataReceivers = new ArrayList<>();
 
-    private static ArrayList<P2pTransmitter> p2pTransmitters = new ArrayList<>();
+    private static ArrayList<DataTransmitter> dataTransmitters = new ArrayList<>();
 
     private static ArrayList<WifiHotspotController> wifiHotspotControllers = new ArrayList<>();
 
@@ -81,11 +81,11 @@ public class WifiManager {
     /**
      * P2P数据接收器
      */
-    private static P2pReceiver p2pReceiver;
+    private static DataReceiver dataReceiver;
     /**
      * P2P数据传输器
      */
-    private static P2pTransmitter p2pTransmitter;
+    private static DataTransmitter dataTransmitter;
     /**
      * 上下文
      */
@@ -206,15 +206,15 @@ public class WifiManager {
 
     public static void releaseP2pRecevier() {
         checkInitStatus();
-        if (p2pReceiver != null) {
-            p2pReceiver.close();
+        if (dataReceiver != null) {
+            dataReceiver.close();
         }
     }
 
     public static void releaseP2pTransmitter() {
         checkInitStatus();
-        if (p2pTransmitter != null) {
-            p2pTransmitter.close();
+        if (dataTransmitter != null) {
+            dataTransmitter.close();
         }
     }
 
@@ -258,17 +258,17 @@ public class WifiManager {
         }
         wifiConnectors.clear();
         releaseP2pRecevier();
-        for (int i = 0; i < p2pReceivers.size(); i++) {
-            P2pReceiver p2pReceiver = p2pReceivers.get(i);
-            p2pReceiver.close();
+        for (int i = 0; i < dataReceivers.size(); i++) {
+            DataReceiver dataReceiver = dataReceivers.get(i);
+            dataReceiver.close();
         }
-        p2pReceivers.clear();
+        dataReceivers.clear();
         releaseP2pTransmitter();
-        for (int i = 0; i < p2pTransmitters.size(); i++) {
-            P2pTransmitter p2pTransmitter = p2pTransmitters.get(i);
-            p2pTransmitter.close();
+        for (int i = 0; i < dataTransmitters.size(); i++) {
+            DataTransmitter dataTransmitter = dataTransmitters.get(i);
+            dataTransmitter.close();
         }
-        p2pTransmitters.clear();
+        dataTransmitters.clear();
         releaseWifiScanner();
         for (int i = 0; i < wifiScanners.size(); i++) {
             WifiScanner wifiScanner = wifiScanners.get(i);
@@ -373,42 +373,42 @@ public class WifiManager {
         WifiManager.wifiStatusBroadcastReceiver.setWifiStateChangedListener(wifiStateChangedListener);
     }
 
-    public static P2pReceiver getP2pReceiverInstance() {
+    public static DataReceiver getDataReceiverInstance() {
         checkInitStatus();
-        if (p2pReceiver == null) {
+        if (dataReceiver == null) {
             synchronized (WifiManager.class) {
-                if (p2pReceiver == null) {
-                    p2pReceiver = new P2pReceiver();
+                if (dataReceiver == null) {
+                    dataReceiver = new DataReceiver();
                 }
             }
         }
-        return p2pReceiver;
+        return dataReceiver;
     }
 
-    public static P2pReceiver newP2pReceiverInstance() {
+    public static DataReceiver newDataReceiverInstance() {
         checkInitStatus();
-        P2pReceiver p2pReceiver = new P2pReceiver();
-        p2pReceivers.add(p2pReceiver);
-        return p2pReceiver;
+        DataReceiver dataReceiver = new DataReceiver();
+        dataReceivers.add(dataReceiver);
+        return dataReceiver;
     }
 
-    public static P2pTransmitter getP2pTransmitterInstance() {
+    public static DataTransmitter getDataTransmitterInstance() {
         checkInitStatus();
-        if (p2pTransmitter == null) {
+        if (dataTransmitter == null) {
             synchronized (WifiManager.class) {
-                if (p2pTransmitter == null) {
-                    p2pTransmitter = new P2pTransmitter();
+                if (dataTransmitter == null) {
+                    dataTransmitter = new DataTransmitter();
                 }
             }
         }
-        return p2pTransmitter;
+        return dataTransmitter;
     }
 
-    public static P2pTransmitter newP2pTransmitterInstance() {
+    public static DataTransmitter newDataTransmitterInstance() {
         checkInitStatus();
-        P2pTransmitter p2pTransmitter = new P2pTransmitter();
-        p2pTransmitters.add(p2pTransmitter);
-        return p2pTransmitter;
+        DataTransmitter dataTransmitter = new DataTransmitter();
+        dataTransmitters.add(dataTransmitter);
+        return dataTransmitter;
     }
 
     /**
@@ -562,11 +562,22 @@ public class WifiManager {
         if (!isWifiEnabled()) {
             return null;
         }
-        WifiInfo connectionInfo = systemWifiManager.getConnectionInfo();
-        if (connectionInfo == null) {
-            return null;
+        return systemWifiManager.getConnectionInfo();
+    }
+
+    /**
+     * 获取最真实的SSID
+     *
+     * @param ssid SSID
+     * @return 真实的SSID
+     */
+    public static String getRealSsid(@NonNull String ssid) {
+        String doubleQuotes = "\"";
+        if (ssid.startsWith(doubleQuotes) && ssid.endsWith(doubleQuotes)) {
+            ssid = ssid.substring(1);
+            ssid = ssid.substring(0, ssid.length() - 1);
         }
-        return connectionInfo;
+        return ssid;
     }
 
     /**
