@@ -4,7 +4,13 @@ import android.Manifest;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiNetworkSpecifier;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +25,6 @@ import java.util.List;
 /**
  * @author jackie
  */
-@SuppressWarnings("deprecation")
 public class WifiConnector {
 
     private static final String TAG = WifiConnector.class.getSimpleName();
@@ -27,31 +32,87 @@ public class WifiConnector {
     private WifiConnectStatusBroadcastReceiver wifiConnectStatusBroadcastReceiver = new WifiConnectStatusBroadcastReceiver(this);
     private ArrayList<OnWifiConnectStateChangedListener> onWifiConnectStateChangedListeners = new ArrayList<>();
     private final android.net.wifi.WifiManager systemWifiManager;
+    private final ConnectivityManager connectivityManager;
 
     WifiConnector() {
         WifiManager.getContext().registerReceiver(wifiConnectStatusBroadcastReceiver, makeIntentFilter());
         systemWifiManager = WifiManager.getSystemWifiManager();
+        connectivityManager = (ConnectivityManager) WifiManager.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
-    public void connectNewWifi(@NonNull String ssid, @Nullable String password, boolean isHidden, EncryptWay encryptWay, boolean attemptConnect) {
-        int existsNetworkId = isExists(ssid);
-        if (existsNetworkId != -1) {
-            boolean enableNetwork = systemWifiManager.enableNetwork(existsNetworkId, attemptConnect);
-            if (enableNetwork) {
-                performWifiConnectingListener(ssid);
+    public void connectNewWifi(@NonNull final String ssid, @Nullable String password, boolean isHidden, EncryptWay encryptWay, boolean attemptConnect) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            int existsNetworkId = isExists(ssid);
+            if (existsNetworkId != -1) {
+                boolean enableNetwork = systemWifiManager.enableNetwork(existsNetworkId, attemptConnect);
+                if (enableNetwork) {
+                    performWifiConnectingListener(ssid);
+                } else {
+                    performWifiConnectFailedListener(ssid);
+                }
             } else {
-                performWifiConnectFailedListener(ssid);
+                String connectedWifiSsid = WifiManager.getConnectedWifiSsid();
+                DebugUtil.warnOut(TAG, "connectedWifiSsid = " + connectedWifiSsid);
+                if (connectedWifiSsid != null && WifiManager.isWifiSsidEquals(connectedWifiSsid, ssid)) {
+                    performWifiConnectedListener(ssid);
+                    return;
+                }
+                systemWifiManager.disconnect();
+                WifiConfiguration wifiConfiguration = createWifiConfiguration(ssid, password, encryptWay, isHidden);
+                connect(wifiConfiguration);
             }
         } else {
-            String connectedWifiSsid = WifiManager.getConnectedWifiSsid();
-            DebugUtil.warnOut(TAG, "connectedWifiSsid = " + connectedWifiSsid);
-            if (connectedWifiSsid != null && WifiManager.isWifiSsidEquals(connectedWifiSsid, ssid)) {
-                performWifiConnectedListener(ssid);
-                return;
+            WifiNetworkSpecifier.Builder builder = new WifiNetworkSpecifier.Builder()
+                    .setSsid(ssid)
+                    .setIsHiddenSsid(isHidden);
+            switch (encryptWay) {
+                case WPA_ENCRYPT:
+                case WPA2_ENCRYPT:
+                case WPA_WPA2_ENCRYPT:
+                case WEP_ENCRYPT:
+                case EAP_ENCRYPT:
+                    if (password != null) {
+                        builder.setWpa2Passphrase(password);
+                    }
+                    break;
+                case UNKNOWN_ENCRYPT:
+                    if (password != null) {
+                        builder.setWpa3Passphrase(password);
+                    }
+                    break;
+                case NO_ENCRYPT:
+                default:
+                    break;
             }
-            systemWifiManager.disconnect();
-            WifiConfiguration wifiConfiguration = createWifiConfiguration(ssid, password, encryptWay, isHidden);
-            connect(wifiConfiguration);
+            WifiNetworkSpecifier specifier = builder.build();
+            NetworkRequest request =
+                    new NetworkRequest.Builder()
+                            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                            .setNetworkSpecifier(specifier)
+                            .build();
+            ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+                @Override
+                public void onAvailable(@NonNull Network network) {
+                    for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                        OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                        if (onWifiConnectStateChangedListener != null) {
+                            onWifiConnectStateChangedListener.connected(ssid);
+                        }
+                    }
+                }
+
+                @Override
+                public void onUnavailable() {
+                    for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                        OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                        if (onWifiConnectStateChangedListener != null) {
+                            onWifiConnectStateChangedListener.connectFailed(ssid);
+                        }
+                    }
+                }
+            };
+            connectivityManager.requestNetwork(request, networkCallback);
         }
     }
 

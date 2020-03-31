@@ -38,7 +38,7 @@ dependencies {
     //常用基础库
     implementation 'com.sscl:baselibrary:0.0.34'
     //Androidx WiFi库
-    implementation project(path: ':x')
+    implementation project(path: ':wifilibrary')
     //RecyclerView适配器
     implementation 'com.sscl:brvahlibrary:0.0.1'
     //多分包支持库

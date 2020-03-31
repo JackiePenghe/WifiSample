@@ -11,8 +11,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/x" />
-            <option value="$PROJECT_DIR$/xsample" />
+            <option value="$PROJECT_DIR$/sample" />
+            <option value="$PROJECT_DIR$/wifilibrary" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
