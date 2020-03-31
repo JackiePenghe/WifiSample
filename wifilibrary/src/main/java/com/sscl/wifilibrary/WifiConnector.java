@@ -88,28 +88,39 @@ public class WifiConnector {
             NetworkRequest request =
                     new NetworkRequest.Builder()
                             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+//                            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
                             .setNetworkSpecifier(specifier)
                             .build();
             ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
                 @Override
                 public void onAvailable(@NonNull Network network) {
-                    for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
-                        OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
-                        if (onWifiConnectStateChangedListener != null) {
-                            onWifiConnectStateChangedListener.connected(ssid);
+                    WifiManager.getHANDLER().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                                OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                                if (onWifiConnectStateChangedListener != null) {
+                                    onWifiConnectStateChangedListener.connected(ssid);
+                                }
+                            }
                         }
-                    }
+                    });
                 }
 
                 @Override
                 public void onUnavailable() {
-                    for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
-                        OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
-                        if (onWifiConnectStateChangedListener != null) {
-                            onWifiConnectStateChangedListener.connectFailed(ssid);
+                    WifiManager.getHANDLER().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
+                                OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
+                                if (onWifiConnectStateChangedListener != null) {
+                                    onWifiConnectStateChangedListener.connectFailed(ssid);
+                                }
+                            }
                         }
-                    }
+                    });
                 }
             };
             connectivityManager.requestNetwork(request, networkCallback);
