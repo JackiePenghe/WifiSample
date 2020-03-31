@@ -134,7 +134,11 @@ public class WifiScanner {
     }
 
     public void close() {
-        WifiManager.getContext().unregisterReceiver(wifiScanDataAndStatusBroadcastReceiver);
+        try {
+            WifiManager.getContext().unregisterReceiver(wifiScanDataAndStatusBroadcastReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setOnWifiScanStateChangedListener(OnWifiScanStateChangedListener onWifiScanStateChangedListener) {
