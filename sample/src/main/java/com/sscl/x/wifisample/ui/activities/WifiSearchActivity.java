@@ -29,6 +29,10 @@ import com.sscl.wifilibrary.intefaces.OnWifiConnectStateChangedListener;
 import com.sscl.wifilibrary.intefaces.OnWifiScanStateChangedListener;
 import com.sscl.x.wifisample.R;
 import com.sscl.x.wifisample.adapters.WifiDeviceAdapter;
+import com.yanzhenjie.kalle.JsonBody;
+import com.yanzhenjie.kalle.Kalle;
+import com.yanzhenjie.kalle.simple.SimpleCallback;
+import com.yanzhenjie.kalle.simple.SimpleResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,142 +87,9 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
 
 
     /**
-     * WiFi连接的扫描回调
+     * 配置WiFi设备的IP地址
      */
-    private OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = new OnWifiConnectStateChangedListener() {
-
-        private AlertDialog alertDialog;
-
-        /**
-         * 正在连接
-         * @param ssid WiFi的名称
-         */
-        @Override
-        public void connecting(String ssid) {
-            DebugUtil.warnOut(TAG, "connecting ssid = " + ssid);
-            if (alertDialog != null) {
-                return;
-            }
-            View view = View.inflate(WifiSearchActivity.this, R.layout.connecting, null);
-            try {
-                alertDialog = new AlertDialog.Builder(WifiSearchActivity.this)
-                        .setView(view)
-                        .show();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        /**
-         * 已连接
-         * @param ssid WiFi的名称
-         */
-        @Override
-        public void connected(String ssid) {
-            DebugUtil.warnOut(TAG, "connected ssid = " + ssid);
-            DebugUtil.warnOut(TAG, "已连接");
-            textView.setText(R.string.connected);
-            String text = getString(R.string.connect_success, ssid);
-            ToastUtil.toastLong(WifiSearchActivity.this, text);
-            if (alertDialog == null) {
-                return;
-            }
-            if (alertDialog.isShowing()) {
-                alertDialog.dismiss();
-                alertDialog = null;
-            }
-//            configDeviceTcpServer();
-        }
-
-        /**
-         * 已断开连接
-         */
-        @Override
-        public void disconnected() {
-            DebugUtil.warnOut(TAG, "disconnected");
-            DebugUtil.warnOut(TAG, "已断开连接");
-        }
-
-        /**
-         * 正在进行身份授权
-         *
-         * @param ssid WiFi的名称
-         */
-        @Override
-        public void authenticating(String ssid) {
-            DebugUtil.warnOut(TAG, "authenticating ssid = " + ssid);
-            textView.setText(R.string.authenticating);
-        }
-
-        /**
-         * 正在获取IP地址
-         *
-         * @param ssid WiFi的名称
-         */
-        @Override
-        public void obtainingIpAddress(String ssid) {
-            DebugUtil.warnOut(TAG, "obtainingIpAddress ssid = " + ssid);
-            textView.setText(R.string.obtaining_ip_address);
-        }
-
-        /**
-         * 连接失败
-         *
-         * @param ssid WiFi的名称
-         */
-        @Override
-        public void connectFailed(String ssid) {
-            DebugUtil.warnOut(TAG, "connectFailed ssid = " + ssid);
-            textView.setText(R.string.connect_failed);
-            if (alertDialog != null && alertDialog.isShowing()) {
-                alertDialog.dismiss();
-                alertDialog = null;
-            }
-        }
-
-        /**
-         * 正在断开连接
-         */
-        @Override
-        public void disconnecting() {
-            DebugUtil.warnOut(TAG, "disconnecting");
-            DebugUtil.warnOut(TAG, "正在断开连接");
-        }
-
-        /**
-         * 未知状态
-         */
-        @Override
-        public void unknownStatus() {
-            DebugUtil.warnOut(TAG, "未知连接状态");
-            textView.setText("未知连接状态");
-        }
-
-        /**
-         * 用户取消了连接动作
-         */
-        @Override
-        public void cancelConnect(String ssid) {
-            DebugUtil.warnOut(TAG, "用户取消了本次连接");
-            ToastUtil.toastLong(WifiSearchActivity.this, "取消连接 SSID:" + ssid);
-
-        }
-
-        /**
-         * 连接超时
-         */
-        @Override
-        public void connectTimeOut() {
-            textView.setText(R.string.connect_time_out);
-            if (alertDialog == null) {
-                return;
-            }
-            if (alertDialog.isShowing()) {
-                alertDialog.dismiss();
-                alertDialog = null;
-            }
-        }
-    };
+    private static final String DEVICE_CONFIG_URL = "http://192.168.4.1";
     /**
      * 点击事件的处理
      */
@@ -430,18 +301,143 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
         recyclerView.setAdapter(wifiScanResultAdapter);
     }
 
-    private void startConnect(WifiDevice wifiDevice) {
-        if (wifiConnector.isContainswifi(wifiDevice.getSSID())) {
-            wifiConnector.connectExistsWifi(wifiDevice.getSSID(), true);
-        } else {
-            EncryptWay encryptWay = wifiDevice.getEncryptWay();
-            if (encryptWay == EncryptWay.NO_ENCRYPT) {
-                wifiConnector.connectNewWifi(wifiDevice.getSSID(), null, false, encryptWay, true);
-            } else {
-                showSetPasswordDialog(wifiDevice);
+    /**
+     * WiFi连接的扫描回调
+     */
+    private OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = new OnWifiConnectStateChangedListener() {
+
+        private AlertDialog alertDialog;
+
+        /**
+         * 正在连接
+         * @param ssid WiFi的名称
+         */
+        @Override
+        public void connecting(String ssid) {
+            DebugUtil.warnOut(TAG, "connecting ssid = " + ssid);
+            if (alertDialog != null) {
+                return;
+            }
+            View view = View.inflate(WifiSearchActivity.this, R.layout.connecting, null);
+            try {
+                alertDialog = new AlertDialog.Builder(WifiSearchActivity.this)
+                        .setView(view)
+                        .show();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
-    }
+
+        /**
+         * 已连接
+         * @param ssid WiFi的名称
+         */
+        @Override
+        public void connected(String ssid) {
+            DebugUtil.warnOut(TAG, "connected ssid = " + ssid);
+            DebugUtil.warnOut(TAG, "已连接");
+            textView.setText(R.string.connected);
+            String text = getString(R.string.connect_success, ssid);
+            ToastUtil.toastLong(WifiSearchActivity.this, text);
+            if (alertDialog == null) {
+                return;
+            }
+            if (alertDialog.isShowing()) {
+                alertDialog.dismiss();
+                alertDialog = null;
+            }
+            configDeviceTcpServer();
+        }
+
+        /**
+         * 已断开连接
+         */
+        @Override
+        public void disconnected() {
+            DebugUtil.warnOut(TAG, "disconnected");
+            DebugUtil.warnOut(TAG, "已断开连接");
+        }
+
+        /**
+         * 正在进行身份授权
+         *
+         * @param ssid WiFi的名称
+         */
+        @Override
+        public void authenticating(String ssid) {
+            DebugUtil.warnOut(TAG, "authenticating ssid = " + ssid);
+            textView.setText(R.string.authenticating);
+        }
+
+        /**
+         * 正在获取IP地址
+         *
+         * @param ssid WiFi的名称
+         */
+        @Override
+        public void obtainingIpAddress(String ssid) {
+            DebugUtil.warnOut(TAG, "obtainingIpAddress ssid = " + ssid);
+            textView.setText(R.string.obtaining_ip_address);
+        }
+
+        /**
+         * 连接失败
+         *
+         * @param ssid WiFi的名称
+         */
+        @Override
+        public void connectFailed(String ssid) {
+            DebugUtil.warnOut(TAG, "connectFailed ssid = " + ssid);
+            textView.setText(R.string.connect_failed);
+            if (alertDialog != null && alertDialog.isShowing()) {
+                alertDialog.dismiss();
+                alertDialog = null;
+            }
+        }
+
+        /**
+         * 正在断开连接
+         */
+        @Override
+        public void disconnecting() {
+            DebugUtil.warnOut(TAG, "disconnecting");
+            DebugUtil.warnOut(TAG, "正在断开连接");
+        }
+
+        /**
+         * 未知状态
+         */
+        @Override
+        public void unknownStatus() {
+            DebugUtil.warnOut(TAG, "未知连接状态");
+            textView.setText("未知连接状态");
+        }
+
+        /**
+         * 用户取消了连接动作
+         */
+        @Override
+        public void cancelConnect(String ssid) {
+            DebugUtil.warnOut(TAG, "用户取消了本次连接");
+            ToastUtil.toastLong(WifiSearchActivity.this, "取消连接 SSID:" + ssid);
+
+        }
+
+        /**
+         * 连接超时
+         */
+        @Override
+        public void connectTimeOut() {
+            textView.setText(R.string.connect_time_out);
+            if (alertDialog == null) {
+                return;
+            }
+            if (alertDialog.isShowing()) {
+                alertDialog.dismiss();
+                alertDialog = null;
+            }
+        }
+    };
 
     private void showSetPasswordDialog(final WifiDevice wifiDevice) {
         final EditText editText = (EditText) View.inflate(this, R.layout.password_edit_text, null);
@@ -464,73 +460,80 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
                 .show();
     }
 
+    private void startConnect(WifiDevice wifiDevice) {
+//        if (wifiConnector.isContainswifi(wifiDevice.getSSID())) {
+//            wifiConnector.connectExistsWifi(wifiDevice.getSSID(), true);
+//        } else {
+        EncryptWay encryptWay = wifiDevice.getEncryptWay();
+        if (encryptWay == EncryptWay.NO_ENCRYPT) {
+            wifiConnector.connectNewWifi(wifiDevice.getSSID(), null, false, encryptWay, true);
+        } else {
+            showSetPasswordDialog(wifiDevice);
+        }
+//        }
+    }
 
-//    /**
-//     * 配置WiFi设备的IP地址
-//     */
-//    private static final String DEVICE_CONFIG_URL = "http://192.168.4.1";
+    /**
+     * 配置设备的TCP服务器IP
+     */
+    private void configDeviceTcpServer() {
+//        NoHttp.initialize(getApplicationContext());
+//        ConfigDeviceTcpServivceInfoBean configDeviceTcpServivceInfoBean = new ConfigDeviceTcpServivceInfoBean();
+//        ConfigDeviceTcpServivceInfoBean.RequestBean requestBean = new ConfigDeviceTcpServivceInfoBean.RequestBean();
+//        ConfigDeviceTcpServivceInfoBean.RequestBean.Tcp tcp = new ConfigDeviceTcpServivceInfoBean.RequestBean.Tcp();
+//        tcp.setDomain(tcpServiceDomain);
+//        tcp.setIp(tcpServiceIp);
+//        tcp.setPort(tcpServicePort);
+//        tcp.setToken(tcpServiceToken);
+//        tcp.setToken(null);
+//        requestBean.setTcp(tcp);
+//        configDeviceTcpServivceInfoBean.setRequest(requestBean);
+//        String json = GSON.toJson(configDeviceTcpServivceInfoBean);
+//        DebugUtil.warnOut(TAG, "configDeviceTcpServer json = " + json);
+        Kalle.post(DEVICE_CONFIG_URL)
+                .path("config")
+                .urlParam("command", "cloud_server")
+                .body(new JsonBody("{\"request\":{\"tcp\":{\"ip\":\"115.29.202.58\",\"port\":8000}}}"))
+                .perform(new SimpleCallback<String>() {
+                    @Override
+                    public void onResponse(SimpleResponse<String, String> response) {
+                        if (response.isSucceed()) {
+                            String succeed = response.succeed();
+                            DebugUtil.warnOut(TAG, "succeed = " + succeed);
+                        } else {
+                            String failed = response.failed();
+                            DebugUtil.warnOut(TAG, "failed = " + failed);
+                        }
+                    }
+                });
+
+//        Request<String> stringRequest = NoHttp.createStringRequest(DEVICE_CONFIG_URL, RequestMethod.POST);
+//        stringRequest.path("config")
+//                .add("command", "cloud_server")
+//                .setDefineRequestBodyForJson();
+//        NoHttp.getRequestQueueInstance().add(1, stringRequest, new OnResponseListener<String>() {
+//            @Override
+//            public void onStart(int what) {
+//                DebugUtil.warnOut(TAG,"onStart");
+//            }
 //
-//    /**
-//     * 配置设备的TCP服务器IP
-//     */
-//    private void configDeviceTcpServer() {
-////        NoHttp.initialize(getApplicationContext());
-////        ConfigDeviceTcpServivceInfoBean configDeviceTcpServivceInfoBean = new ConfigDeviceTcpServivceInfoBean();
-////        ConfigDeviceTcpServivceInfoBean.RequestBean requestBean = new ConfigDeviceTcpServivceInfoBean.RequestBean();
-////        ConfigDeviceTcpServivceInfoBean.RequestBean.Tcp tcp = new ConfigDeviceTcpServivceInfoBean.RequestBean.Tcp();
-////        tcp.setDomain(tcpServiceDomain);
-////        tcp.setIp(tcpServiceIp);
-////        tcp.setPort(tcpServicePort);
-////        tcp.setToken(tcpServiceToken);
-////        tcp.setToken(null);
-////        requestBean.setTcp(tcp);
-////        configDeviceTcpServivceInfoBean.setRequest(requestBean);
-////        String json = GSON.toJson(configDeviceTcpServivceInfoBean);
-////        DebugUtil.warnOut(TAG, "configDeviceTcpServer json = " + json);
-//        Kalle.post(DEVICE_CONFIG_URL)
-//                .path("config")
-//                .urlParam("command","cloud_server")
-//                .body(new JsonBody("{\"request\":{\"tcp\":{\"ip\":\"115.29.202.58\",\"port\":8000}}}"))
-//                .perform(new SimpleCallback<String>() {
-//                    @Override
-//                    public void onResponse(SimpleResponse<String, String> response) {
-//                        if (response.isSucceed()){
-//                            String succeed = response.succeed();
-//                            DebugUtil.warnOut(TAG,"succeed = " + succeed);
-//                        }else {
-//                            String failed = response.failed();
-//                            DebugUtil.warnOut(TAG,"failed = " + failed);
-//                        }
-//                    }
-//                });
+//            @Override
+//            public void onSucceed(int what, Response<String> response) {
+//                DebugUtil.warnOut(TAG,"onSucceed");
 //
-////        Request<String> stringRequest = NoHttp.createStringRequest(DEVICE_CONFIG_URL, RequestMethod.POST);
-////        stringRequest.path("config")
-////                .add("command", "cloud_server")
-////                .setDefineRequestBodyForJson();
-////        NoHttp.getRequestQueueInstance().add(1, stringRequest, new OnResponseListener<String>() {
-////            @Override
-////            public void onStart(int what) {
-////                DebugUtil.warnOut(TAG,"onStart");
-////            }
-////
-////            @Override
-////            public void onSucceed(int what, Response<String> response) {
-////                DebugUtil.warnOut(TAG,"onSucceed");
-////
-////            }
-////
-////            @Override
-////            public void onFailed(int what, Response<String> response) {
-////                DebugUtil.warnOut(TAG,"onFailed");
-////
-////            }
-////
-////            @Override
-////            public void onFinish(int what) {
-////                DebugUtil.warnOut(TAG,"onFinish");
-////
-////            }
-////        });
-//    }
+//            }
+//
+//            @Override
+//            public void onFailed(int what, Response<String> response) {
+//                DebugUtil.warnOut(TAG,"onFailed");
+//
+//            }
+//
+//            @Override
+//            public void onFinish(int what) {
+//                DebugUtil.warnOut(TAG,"onFinish");
+//
+//            }
+//        });
+    }
 }

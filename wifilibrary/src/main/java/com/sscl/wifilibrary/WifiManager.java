@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.provider.Settings;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.sscl.wifilibrary.enums.EncryptWay;
 import com.sscl.wifilibrary.intefaces.OnWifiStateChangedListener;
@@ -571,7 +572,11 @@ public class WifiManager {
      * @param ssid SSID
      * @return 真实的SSID
      */
-    public static String getRealSsid(@NonNull String ssid) {
+    @Nullable
+    public static String getRealSsid(@Nullable String ssid) {
+        if (ssid == null) {
+            return null;
+        }
         String doubleQuotes = "\"";
         if (ssid.startsWith(doubleQuotes) && ssid.endsWith(doubleQuotes)) {
             ssid = ssid.substring(1);

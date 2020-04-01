@@ -36,7 +36,7 @@ public class WifiConnector {
     private ArrayList<OnWifiConnectStateChangedListener> onWifiConnectStateChangedListeners = new ArrayList<>();
     private final android.net.wifi.WifiManager systemWifiManager;
     private final ConnectivityManager connectivityManager;
-    private String ssid;
+    private String ssid = WifiManager.getRealSsid(WifiManager.getConnectedWifiSsid());
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private final ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
         @Override
@@ -65,6 +65,10 @@ public class WifiConnector {
         public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
             super.onCapabilitiesChanged(network, networkCapabilities);
             DebugUtil.warnOut(TAG, "onCapabilitiesChanged networkCapabilities = " + networkCapabilities);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connectivityManager.reportNetworkConnectivity(network, false);
+            }
         }
 
         @Override
@@ -81,6 +85,10 @@ public class WifiConnector {
         public void onBlockedStatusChanged(@NonNull Network network, boolean blocked) {
             super.onBlockedStatusChanged(network, blocked);
             DebugUtil.warnOut(TAG, "onBlockedStatusChanged");
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connectivityManager.reportNetworkConnectivity(network, false);
+            }
         }
 
         @Override
@@ -223,19 +231,6 @@ public class WifiConnector {
     public void removeAllOnWifiConnectStateChangedListener() {
         onWifiConnectStateChangedListeners.clear();
         wifiConnectStatusBroadcastReceiver.removeAllOnWifiConnectStateChangedListener();
-    }
-
-    public boolean isContainswifi(String ssid) {
-        return isExists(ssid) != -1;
-    }
-
-    public void connectExistsWifi(String ssid, boolean attemptConnect) {
-        int exists = isExists(ssid);
-        if (exists == -1) {
-            performWifiConnectFailedListener(ssid);
-            return;
-        }
-        systemWifiManager.enableNetwork(exists, attemptConnect);
     }
 
     void onWifiConnected(String ssid) {
