@@ -60,7 +60,7 @@ public class DataTransmitter {
                 }
                 return;
             }
-            wifiConnector.connectNewWifi(WifiConstants.HOT_SPOTS_NAME, WifiConstants.HOT_SPOTS_PASSWORD, false, EncryptWay.WPA_WPA2_ENCRYPT, true);
+            wifiConnector.connect(WifiConstants.HOT_SPOTS_NAME, WifiConstants.HOT_SPOTS_PASSWORD, false, EncryptWay.WPA_WPA2_ENCRYPT, true);
         }
     };
 

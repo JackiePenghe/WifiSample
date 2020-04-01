@@ -113,7 +113,7 @@ public class WifiConnector {
         }
     }
 
-    public void connectNewWifi(@NonNull final String ssid, @Nullable String password, boolean isHidden, EncryptWay encryptWay, boolean attemptConnect) {
+    public void connect(@NonNull final String ssid, @Nullable String password, boolean isHidden, EncryptWay encryptWay, boolean attemptConnect) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             int existsNetworkId = isExists(ssid);
             if (existsNetworkId != -1) {
@@ -194,10 +194,12 @@ public class WifiConnector {
         }
     }
 
+    @Deprecated
     public boolean disConnect() {
         return systemWifiManager.disconnect();
     }
 
+    @Deprecated
     public void forgetNetwork(String ssid) {
         Context context = WifiManager.getContext();
         int checkSelfPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_WIFI_STATE);

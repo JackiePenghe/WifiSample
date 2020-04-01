@@ -2,6 +2,7 @@ package com.sscl.x.wifisample.ui.activities;
 
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -152,6 +153,17 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
             wifiScanResultAdapter.notifyDataSetChanged();
         }
     };
+    private BaseQuickAdapter.OnItemLongClickListener onItemLongClickListener = new BaseQuickAdapter.OnItemLongClickListener() {
+        @Override
+        public boolean onItemLongClick(BaseQuickAdapter adapter, View view, int position) {
+            String ssid = adapterList.get(position).getSSID();
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                wifiConnector.forgetNetwork(ssid);
+                return true;
+            }
+            return false;
+        }
+    };
 
     /*---------------------------实现父类方法---------------------------*/
 
@@ -298,6 +310,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
         DefaultItemDecoration defaultItemDecoration = DefaultItemDecoration.newLine(Color.GRAY);
         recyclerView.addItemDecoration(defaultItemDecoration);
         wifiScanResultAdapter.setOnItemClickListener(onItemClickListener);
+        wifiScanResultAdapter.setOnItemLongClickListener(onItemLongClickListener);
         recyclerView.setAdapter(wifiScanResultAdapter);
     }
 
@@ -453,7 +466,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
                             showSetPasswordDialog(wifiDevice);
                             return;
                         }
-                        wifiConnector.connectNewWifi(wifiDevice.getSSID(), password, false, wifiDevice.getEncryptWay(), false);
+                        wifiConnector.connect(wifiDevice.getSSID(), password, false, wifiDevice.getEncryptWay(), false);
                     }
                 })
                 .setNegativeButton(R.string.cancel, null)
@@ -466,7 +479,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
 //        } else {
         EncryptWay encryptWay = wifiDevice.getEncryptWay();
         if (encryptWay == EncryptWay.NO_ENCRYPT) {
-            wifiConnector.connectNewWifi(wifiDevice.getSSID(), null, false, encryptWay, true);
+            wifiConnector.connect(wifiDevice.getSSID(), null, false, encryptWay, true);
         } else {
             showSetPasswordDialog(wifiDevice);
         }
