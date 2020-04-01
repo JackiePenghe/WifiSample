@@ -75,7 +75,15 @@ public class WelcomeActivity extends BaseWelcomeActivity {
     private Action<List<String>> grantedAction = new Action<List<String>>() {
         @Override
         public void onAction(List<String> permissions) {
+////            Intent intent = new Intent("android.permission.CONNECTIVITY_INTERNAL");
+////            intent.setData(Uri.parse("package:" + getPackageName()));
+////            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+////            startActivity(intent);
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                requestPermissions(new String[]{"android.permission.CONNECTIVITY_INTERNAL"},1);
+//            }else {
             toNext();
+//            }
         }
     };
 

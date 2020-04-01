@@ -33,6 +33,13 @@ import com.sscl.x.wifisample.adapters.WifiDeviceAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+//import com.yanzhenjie.nohttp.NoHttp;
+//import com.yanzhenjie.nohttp.RequestMethod;
+//import com.yanzhenjie.nohttp.rest.OnResponseListener;
+//import com.yanzhenjie.nohttp.rest.Request;
+//import com.yanzhenjie.nohttp.rest.Response;
+//import com.yanzhenjie.nohttp.rest.SimpleResponseListener;
+
 /**
  * @author jackie
  */
@@ -120,6 +127,7 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
                 alertDialog.dismiss();
                 alertDialog = null;
             }
+//            configDeviceTcpServer();
         }
 
         /**
@@ -455,4 +463,74 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
                 .setNegativeButton(R.string.cancel, null)
                 .show();
     }
+
+
+//    /**
+//     * 配置WiFi设备的IP地址
+//     */
+//    private static final String DEVICE_CONFIG_URL = "http://192.168.4.1";
+//
+//    /**
+//     * 配置设备的TCP服务器IP
+//     */
+//    private void configDeviceTcpServer() {
+////        NoHttp.initialize(getApplicationContext());
+////        ConfigDeviceTcpServivceInfoBean configDeviceTcpServivceInfoBean = new ConfigDeviceTcpServivceInfoBean();
+////        ConfigDeviceTcpServivceInfoBean.RequestBean requestBean = new ConfigDeviceTcpServivceInfoBean.RequestBean();
+////        ConfigDeviceTcpServivceInfoBean.RequestBean.Tcp tcp = new ConfigDeviceTcpServivceInfoBean.RequestBean.Tcp();
+////        tcp.setDomain(tcpServiceDomain);
+////        tcp.setIp(tcpServiceIp);
+////        tcp.setPort(tcpServicePort);
+////        tcp.setToken(tcpServiceToken);
+////        tcp.setToken(null);
+////        requestBean.setTcp(tcp);
+////        configDeviceTcpServivceInfoBean.setRequest(requestBean);
+////        String json = GSON.toJson(configDeviceTcpServivceInfoBean);
+////        DebugUtil.warnOut(TAG, "configDeviceTcpServer json = " + json);
+//        Kalle.post(DEVICE_CONFIG_URL)
+//                .path("config")
+//                .urlParam("command","cloud_server")
+//                .body(new JsonBody("{\"request\":{\"tcp\":{\"ip\":\"115.29.202.58\",\"port\":8000}}}"))
+//                .perform(new SimpleCallback<String>() {
+//                    @Override
+//                    public void onResponse(SimpleResponse<String, String> response) {
+//                        if (response.isSucceed()){
+//                            String succeed = response.succeed();
+//                            DebugUtil.warnOut(TAG,"succeed = " + succeed);
+//                        }else {
+//                            String failed = response.failed();
+//                            DebugUtil.warnOut(TAG,"failed = " + failed);
+//                        }
+//                    }
+//                });
+//
+////        Request<String> stringRequest = NoHttp.createStringRequest(DEVICE_CONFIG_URL, RequestMethod.POST);
+////        stringRequest.path("config")
+////                .add("command", "cloud_server")
+////                .setDefineRequestBodyForJson();
+////        NoHttp.getRequestQueueInstance().add(1, stringRequest, new OnResponseListener<String>() {
+////            @Override
+////            public void onStart(int what) {
+////                DebugUtil.warnOut(TAG,"onStart");
+////            }
+////
+////            @Override
+////            public void onSucceed(int what, Response<String> response) {
+////                DebugUtil.warnOut(TAG,"onSucceed");
+////
+////            }
+////
+////            @Override
+////            public void onFailed(int what, Response<String> response) {
+////                DebugUtil.warnOut(TAG,"onFailed");
+////
+////            }
+////
+////            @Override
+////            public void onFinish(int what) {
+////                DebugUtil.warnOut(TAG,"onFinish");
+////
+////            }
+////        });
+//    }
 }

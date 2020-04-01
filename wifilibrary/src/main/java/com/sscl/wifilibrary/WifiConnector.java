@@ -1,16 +1,19 @@
 package com.sscl.wifilibrary;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiNetworkSpecifier;
 import android.os.Build;
+import android.os.PatternMatcher;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,11 +36,73 @@ public class WifiConnector {
     private ArrayList<OnWifiConnectStateChangedListener> onWifiConnectStateChangedListeners = new ArrayList<>();
     private final android.net.wifi.WifiManager systemWifiManager;
     private final ConnectivityManager connectivityManager;
+    private String ssid;
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private final ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onAvailable(@NonNull Network network) {
+            WifiManager.getHANDLER().post(new Runnable() {
+                @Override
+                public void run() {
+                    performWifiConnectedListener(ssid);
+                }
+            });
+        }
+
+        @Override
+        public void onLosing(@NonNull Network network, int maxMsToLive) {
+            super.onLosing(network, maxMsToLive);
+            DebugUtil.warnOut(TAG, "onLosing");
+        }
+
+        @Override
+        public void onLost(@NonNull Network network) {
+            super.onLost(network);
+            DebugUtil.warnOut(TAG, "onLost");
+        }
+
+        @Override
+        public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+            super.onCapabilitiesChanged(network, networkCapabilities);
+            DebugUtil.warnOut(TAG, "onCapabilitiesChanged networkCapabilities = " + networkCapabilities);
+        }
+
+        @Override
+        public void onLinkPropertiesChanged(@NonNull Network network, @NonNull LinkProperties linkProperties) {
+            super.onLinkPropertiesChanged(network, linkProperties);
+            DebugUtil.warnOut(TAG, "onLinkPropertiesChanged");
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                connectivityManager.reportNetworkConnectivity(network, false);
+            }
+        }
+
+        @Override
+        public void onBlockedStatusChanged(@NonNull Network network, boolean blocked) {
+            super.onBlockedStatusChanged(network, blocked);
+            DebugUtil.warnOut(TAG, "onBlockedStatusChanged");
+        }
+
+        @Override
+        public void onUnavailable() {
+            WifiManager.getHANDLER().post(new Runnable() {
+                @Override
+                public void run() {
+                    performWifiConnectFailedListener(ssid);
+                }
+            });
+        }
+    };
 
     WifiConnector() {
         WifiManager.getContext().registerReceiver(wifiConnectStatusBroadcastReceiver, makeIntentFilter());
         systemWifiManager = WifiManager.getSystemWifiManager();
         connectivityManager = (ConnectivityManager) WifiManager.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                connectivityManager.registerDefaultNetworkCallback(networkCallback);
+            }
+        }
     }
 
     public void connectNewWifi(@NonNull final String ssid, @Nullable String password, boolean isHidden, EncryptWay encryptWay, boolean attemptConnect) {
@@ -62,8 +127,16 @@ public class WifiConnector {
                 connect(wifiConfiguration);
             }
         } else {
+            WifiConnector.this.ssid = ssid;
+            String connectedWifiSsid = WifiManager.getConnectedWifiSsid();
+            DebugUtil.warnOut(TAG, "connectedWifiSsid = " + connectedWifiSsid);
+            if (connectedWifiSsid != null && WifiManager.isWifiSsidEquals(connectedWifiSsid, ssid)) {
+                performWifiConnectedListener(ssid);
+                return;
+            }
             WifiNetworkSpecifier.Builder builder = new WifiNetworkSpecifier.Builder()
-                    .setSsid(ssid)
+//                    .setSsid(ssid)
+                    .setSsidPattern(new PatternMatcher(ssid, PatternMatcher.PATTERN_PREFIX))
                     .setIsHiddenSsid(isHidden);
             switch (encryptWay) {
                 case WPA_ENCRYPT:
@@ -88,50 +161,28 @@ public class WifiConnector {
             NetworkRequest request =
                     new NetworkRequest.Builder()
                             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-//                            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+                            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                             .setNetworkSpecifier(specifier)
                             .build();
-            ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onAvailable(@NonNull Network network) {
-                    WifiManager.getHANDLER().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
-                                OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
-                                if (onWifiConnectStateChangedListener != null) {
-                                    onWifiConnectStateChangedListener.connected(ssid);
-                                }
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public void onUnavailable() {
-                    WifiManager.getHANDLER().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            for (int i = 0; i < onWifiConnectStateChangedListeners.size(); i++) {
-                                OnWifiConnectStateChangedListener onWifiConnectStateChangedListener = onWifiConnectStateChangedListeners.get(i);
-                                if (onWifiConnectStateChangedListener != null) {
-                                    onWifiConnectStateChangedListener.connectFailed(ssid);
-                                }
-                            }
-                        }
-                    });
-                }
-            };
             connectivityManager.requestNetwork(request, networkCallback);
         }
     }
+
 
     public void close() {
         try {
             WifiManager.getContext().unregisterReceiver(wifiConnectStatusBroadcastReceiver);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        if (connectivityManager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                try {
+                    connectivityManager.unregisterNetworkCallback(networkCallback);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

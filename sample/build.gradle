@@ -44,7 +44,9 @@ dependencies {
     //多分包支持库
     implementation 'androidx.multidex:multidex:2.0.1'
     //动态权限库
-    //noinspection GradleDependency
-    implementation 'com.yanzhenjie.permission:x:2.0.1'
+    implementation 'com.yanzhenjie:permission:2.0.3'
+
+//    implementation 'com.yanzhenjie.nohttp:nohttp:1.1.11'
+    implementation 'com.yanzhenjie:kalle:0.1.7'
 
 }
