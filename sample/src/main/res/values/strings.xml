@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">WifiSample</string>
-    <string name="permission_denied">Rejection of privileges may cause some functions to be unavailable</string>
-    <string name="request_permission">Request permission</string>
-    <string name="request_permission_message">Because you rejected the permission request last time, it may cause some functions of the program can not be used properly. Do you allow the program to re-request permission?</string>
     <string name="wifi_hotspot">WiFi hotspot</string>
     <string name="wifi">Standard WiFi usage</string>
     <string name="start_search">Start search</string>
@@ -36,4 +33,8 @@
     <string name="set_password">Set password</string>
     <string name="password">Password</string>
     <string name="password_too_short">Password too short!</string>
+    <string name="no_permission">No permission</string>
+    <string name="no_permission_message">The application does not have permission, please go to the settings to allow all permissions</string>
+    <string name="settings">Go setting</string>
+    <string name="no_permission_exit">No permission!The Application exit</string>
 </resources>

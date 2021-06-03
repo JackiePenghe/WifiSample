@@ -3,7 +3,7 @@ package com.sscl.wifilibrary.intefaces.impl;
 
 import androidx.annotation.Nullable;
 
-import com.sscl.wifilibrary.DebugUtil;
+import com.sscl.wifilibrary.WifiManager;
 import com.sscl.wifilibrary.bean.WifiDevice;
 import com.sscl.wifilibrary.intefaces.OnWifiScanStateChangedListener;
 
@@ -24,7 +24,7 @@ public class DefaultOnWifiScanStateChangedListener implements OnWifiScanStateCha
      */
     @Override
     public void startScanFailed() {
-        DebugUtil.warnOut(TAG, "startScanFailed");
+        WifiManager.warnOut(TAG, "startScanFailed");
     }
 
     /**
@@ -32,7 +32,7 @@ public class DefaultOnWifiScanStateChangedListener implements OnWifiScanStateCha
      */
     @Override
     public void isScanning() {
-        DebugUtil.warnOut(TAG, "isScanning");
+        WifiManager.warnOut(TAG, "isScanning");
     }
 
     /**
@@ -45,9 +45,9 @@ public class DefaultOnWifiScanStateChangedListener implements OnWifiScanStateCha
         if (wifiDevices != null) {
             WifiDevice[] wifiDevicesArray = new WifiDevice[wifiDevices.size()];
             wifiDevices.toArray(wifiDevicesArray);
-            DebugUtil.warnOut(TAG, Arrays.toString(wifiDevicesArray));
+            WifiManager.warnOut(TAG, Arrays.toString(wifiDevicesArray));
         } else {
-            DebugUtil.warnOut(TAG, "wifiDevices == null");
+            WifiManager.warnOut(TAG, "wifiDevices == null");
         }
     }
 }

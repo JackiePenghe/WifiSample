@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">WifiSample</string>
-    <string name="permission_denied">权限被拒绝，可能会导致部分功能无法使用</string>
-    <string name="request_permission">请求权限</string>
-    <string name="request_permission_message">因为您在上次拒绝了权限请求，可能导致程序部分功能无法正常使用，是否允许程序重新请求权限？</string>
     <string name="wifi_hotspot">WiFi热点</string>
     <string name="wifi">标准WiFi使用</string>
     <string name="start_search">开始搜索</string>
@@ -36,4 +33,8 @@
     <string name="set_password">设置密码</string>
     <string name="password">密码</string>
     <string name="password_too_short">密码过短！</string>
+    <string name="no_permission">没有权限</string>
+    <string name="no_permission_message">应用程序没有权限，请到设置中允许所有权限</string>
+    <string name="settings">去设置</string>
+    <string name="no_permission_exit">没有权限，程序退出</string>
 </resources>

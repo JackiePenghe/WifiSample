@@ -1,7 +1,7 @@
 package com.sscl.wifilibrary.intefaces.impl;
 
 
-import com.sscl.wifilibrary.DebugUtil;
+import com.sscl.wifilibrary.WifiManager;
 import com.sscl.wifilibrary.intefaces.OnWifiConnectStateChangedListener;
 
 /**
@@ -20,7 +20,7 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void connecting(String ssid) {
-        DebugUtil.warnOut(TAG, "connecting ssid = " + ssid);
+        WifiManager.warnOut(TAG, "connecting ssid = " + ssid);
     }
 
     /**
@@ -30,7 +30,7 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void connected(String ssid) {
-        DebugUtil.warnOut(TAG, "connected ssid = " + ssid);
+        WifiManager.warnOut(TAG, "connected ssid = " + ssid);
     }
 
     /**
@@ -38,7 +38,7 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void disconnected() {
-        DebugUtil.warnOut(TAG, "disconnected");
+        WifiManager.warnOut(TAG, "disconnected");
     }
 
     /**
@@ -48,7 +48,7 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void authenticating(String ssid) {
-        DebugUtil.warnOut(TAG, "authenticating ssid = " + ssid);
+        WifiManager.warnOut(TAG, "authenticating ssid = " + ssid);
     }
 
     /**
@@ -58,7 +58,7 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void obtainingIpAddress(String ssid) {
-        DebugUtil.warnOut(TAG, "obtainingIpAddress ssid = " + ssid);
+        WifiManager.warnOut(TAG, "obtainingIpAddress ssid = " + ssid);
     }
 
     /**
@@ -68,7 +68,7 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void connectFailed(String ssid) {
-        DebugUtil.warnOut(TAG, "connectFailed ssid = " + ssid);
+        WifiManager.warnOut(TAG, "connectFailed ssid = " + ssid);
     }
 
     /**
@@ -76,7 +76,7 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void disconnecting() {
-        DebugUtil.warnOut(TAG, "disconnecting");
+        WifiManager.warnOut(TAG, "disconnecting");
     }
 
     /**
@@ -84,7 +84,7 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void unknownStatus() {
-        DebugUtil.warnOut(TAG, "unknownStatus");
+        WifiManager.warnOut(TAG, "unknownStatus");
     }
 
     /**
@@ -94,7 +94,7 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void cancelConnect(String ssid) {
-        DebugUtil.warnOut(TAG, "cancelConnect ssid = " + ssid);
+        WifiManager.warnOut(TAG, "cancelConnect ssid = " + ssid);
     }
 
     /**
@@ -102,6 +102,6 @@ public class DefaultOnWifiConnectStateChangedListener implements OnWifiConnectSt
      */
     @Override
     public void connectTimeOut() {
-        DebugUtil.warnOut(TAG, "connectTimeOut");
+        WifiManager.warnOut(TAG, "connectTimeOut");
     }
 }

@@ -108,8 +108,8 @@ public class ReceiveFileActivity extends BaseAppCompatActivity {
      * 标题栏的返回按钮被按下的时候回调此函数
      */
     @Override
-    protected void titleBackClicked() {
-        onBackPressed();
+    protected boolean titleBackClicked() {
+        return false;
     }
 
     /**
@@ -216,6 +216,6 @@ public class ReceiveFileActivity extends BaseAppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.addItemDecoration(defaultItemDecoration);
-        connectedDeviceRecyclerViewAdapter.bindToRecyclerView(recyclerView);
+        recyclerView.setAdapter(connectedDeviceRecyclerViewAdapter);
     }
 }

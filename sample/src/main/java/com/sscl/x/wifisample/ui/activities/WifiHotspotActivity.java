@@ -1,7 +1,5 @@
 package com.sscl.x.wifisample.ui.activities;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.net.wifi.WifiConfiguration;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 
 import com.sscl.baselibrary.activity.BaseAppCompatActivity;
 import com.sscl.baselibrary.utils.DebugUtil;
@@ -18,10 +15,6 @@ import com.sscl.wifilibrary.WifiHotspotController;
 import com.sscl.wifilibrary.WifiManager;
 import com.sscl.wifilibrary.intefaces.OnWifiHotspotStateChangedListener;
 import com.sscl.x.wifisample.R;
-import com.yanzhenjie.permission.Action;
-import com.yanzhenjie.permission.AndPermission;
-import com.yanzhenjie.permission.Rationale;
-import com.yanzhenjie.permission.RequestExecutor;
 
 /**
  * @author jackie
@@ -89,42 +82,6 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
             }
         }
     };
-    private Action<Void> onGrantedListener = new Action<Void>() {
-        @Override
-        public void onAction(Void data) {
-            //创建WiFi热点
-            wifiHotspotController.createHotspot();
-        }
-    };
-    private Action<Void> onDeniedListener = new Action<Void>() {
-        @Override
-        public void onAction(Void data) {
-            ToastUtil.toastLong(WifiHotspotActivity.this, "没有权限，热点创建失败！");
-        }
-    };
-    private Rationale<Void> rationaleListener = new Rationale<Void>() {
-        @Override
-        public void showRationale(Context context, Void data, final RequestExecutor executor) {
-            new AlertDialog.Builder(WifiHotspotActivity.this)
-                    .setTitle(R.string.no_write_setting_permission)
-                    .setMessage(R.string.no_write_setting_permission_message)
-                    .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            executor.execute();
-                        }
-                    })
-                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            executor.cancel();
-                        }
-                    })
-                    .setCancelable(false)
-                    .show();
-
-        }
-    };
     /**
      * 点击事件处理回调接口
      */
@@ -151,8 +108,8 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
      * 标题栏的返回按钮被按下的时候回调此函数
      */
     @Override
-    protected void titleBackClicked() {
-        onBackPressed();
+    protected boolean titleBackClicked() {
+        return false;
     }
 
     /**
@@ -285,14 +242,7 @@ public class WifiHotspotActivity extends BaseAppCompatActivity {
                 return;
             }
         }
-        AndPermission.with(this)
-                .setting()
-                .write()
-                .onGranted(onGrantedListener)
-                .onDenied(onDeniedListener)
-                .rationale(rationaleListener)
-                .start();
-
+        wifiHotspotController.createHotspot();
     }
 
     /**

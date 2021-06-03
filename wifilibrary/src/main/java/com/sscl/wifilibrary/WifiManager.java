@@ -711,6 +711,10 @@ public class WifiManager {
         context.startActivity(intent);
     }
 
+    public static void warnOut(String tag, String message) {
+        DebugUtil.warnOut(tag, message);
+    }
+
     /**
      * 用于回调权限请求结果
      */

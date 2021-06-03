@@ -9,7 +9,6 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 
 import com.sscl.baselibrary.activity.BaseAppCompatActivity;
-import com.sscl.wifilibrary.DebugUtil;
 import com.sscl.wifilibrary.WifiManager;
 import com.sscl.x.wifisample.R;
 
@@ -76,8 +75,8 @@ public class MainActivity extends BaseAppCompatActivity {
      * 标题栏的返回按钮被按下的时候回调此函数
      */
     @Override
-    protected void titleBackClicked() {
-        onBackPressed();
+    protected boolean titleBackClicked() {
+        return false;
     }
 
     /**
@@ -107,9 +106,9 @@ public class MainActivity extends BaseAppCompatActivity {
         setTitleText(R.string.app_name);
         String connectedWifiSsid = WifiManager.getConnectedWifiSsid();
         if (connectedWifiSsid != null) {
-            DebugUtil.warnOut(TAG, "connectedWifiSsid = " + connectedWifiSsid);
+            WifiManager.warnOut(TAG, "connectedWifiSsid = " + connectedWifiSsid);
             String realSsid = WifiManager.getRealSsid(connectedWifiSsid);
-            DebugUtil.warnOut(TAG, "realSsid = " + realSsid);
+            WifiManager.warnOut(TAG, "realSsid = " + realSsid);
         }
     }
 

@@ -1,17 +1,15 @@
 apply plugin: 'com.android.library'
-// 这里添加下面两行代码。
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
+
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
 
 
     defaultConfig {
         minSdkVersion 18
-        targetSdkVersion 29
-        versionCode 10
-        versionName "0.0.10"
+        targetSdkVersion 30
+        versionCode 11
+        versionName "0.0.11"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -28,98 +26,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-}
-
-
-version = "0.0.10"
-
-def siteUrl = 'https://github.com/JackiePenghe/WifiSample'
-def gitUrl = 'https://github.com/JackiePenghe/WifiSample.git'
-
-group = "com.sscl"
-
-install {
-    repositories.mavenInstaller {
-        pom {
-            project {
-                packaging 'aar'
-                name 'WifiLibrary For Android'
-                description 'WifiLibrary For Android'
-                url siteUrl
-
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'sscl'
-                        name 'sscl'
-                        email 'p15583101939@gmail.com'
-                    }
-                }
-
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
-                }
-            }
-        }
-    }
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    //noinspection GrDeprecatedAPIUsage
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    options {
-        encoding "UTF-8"
-        charSet 'UTF-8'
-        author true
-        version true
-        links "http://docs.oracle.com/javase/7/docs/api"
-    }
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-
-    failOnError false
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    //noinspection GrDeprecatedAPIUsage
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
-
-    configurations = ['archives']
-    pkg {
-        repo = "maven"
-        name = "wifilibrary"
-        userOrg = 'sscl'
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = ["Apache-2.0"]
-        publish = true
-    }
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    testImplementation 'junit:junit:4.13'
+    androidTestImplementation 'androidx.test:runner:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }

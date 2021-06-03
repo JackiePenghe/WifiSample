@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.chad.library.adapter.base.listener.OnItemClickListener;
+import com.chad.library.adapter.base.listener.OnItemLongClickListener;
 import com.sscl.baselibrary.activity.BaseAppCompatActivity;
 import com.sscl.baselibrary.utils.DebugUtil;
 import com.sscl.baselibrary.utils.DefaultItemDecoration;
@@ -108,14 +110,6 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
         }
     };
 
-    private BaseQuickAdapter.OnItemClickListener onItemClickListener = new BaseQuickAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-            WifiDevice wifiDevice = adapterList.get(position);
-            startConnect(wifiDevice);
-        }
-    };
-
     private OnWifiScanStateChangedListener onWifiScanStateChangedListener = new OnWifiScanStateChangedListener() {
         @Override
         public void startScanFailed() {
@@ -153,9 +147,16 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
             wifiScanResultAdapter.notifyDataSetChanged();
         }
     };
-    private BaseQuickAdapter.OnItemLongClickListener onItemLongClickListener = new BaseQuickAdapter.OnItemLongClickListener() {
+    private OnItemClickListener onItemClickListener = new OnItemClickListener() {
         @Override
-        public boolean onItemLongClick(BaseQuickAdapter adapter, View view, int position) {
+        public void onItemClick(@NonNull BaseQuickAdapter<?, ?> adapter, @NonNull View view, int position) {
+            WifiDevice wifiDevice = adapterList.get(position);
+            startConnect(wifiDevice);
+        }
+    };
+    private OnItemLongClickListener onItemLongClickListener = new OnItemLongClickListener() {
+        @Override
+        public boolean onItemLongClick(@NonNull BaseQuickAdapter adapter, @NonNull View view, int position) {
             String ssid = adapterList.get(position).getSSID();
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 wifiConnector.forgetNetwork(ssid);
@@ -171,8 +172,8 @@ public class WifiSearchActivity extends BaseAppCompatActivity {
      * 标题栏的返回按钮被按下的时候回调此函数
      */
     @Override
-    protected void titleBackClicked() {
-        onBackPressed();
+    protected boolean titleBackClicked() {
+        return false;
     }
 
     /**

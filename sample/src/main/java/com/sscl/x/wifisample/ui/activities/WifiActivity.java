@@ -60,8 +60,8 @@ public class WifiActivity extends BaseAppCompatActivity {
      * 标题栏的返回按钮被按下的时候回调此函数
      */
     @Override
-    protected void titleBackClicked() {
-        onBackPressed();
+    protected boolean titleBackClicked() {
+        return false;
     }
 
     /**

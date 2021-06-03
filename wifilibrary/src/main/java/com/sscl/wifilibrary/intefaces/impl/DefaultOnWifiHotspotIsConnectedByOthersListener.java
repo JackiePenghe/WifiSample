@@ -1,6 +1,6 @@
 package com.sscl.wifilibrary.intefaces.impl;
 
-import com.sscl.wifilibrary.DebugUtil;
+import com.sscl.wifilibrary.WifiManager;
 import com.sscl.wifilibrary.intefaces.OnWifiHotspotIsConnectedByOthersListener;
 
 import java.util.ArrayList;
@@ -20,10 +20,10 @@ public final class DefaultOnWifiHotspotIsConnectedByOthersListener implements On
      */
     @Override
     public void onConnectedDevices(ArrayList<String> connectedIPs) {
-        DebugUtil.warnOut(TAG, "onConnectedDevices");
+        WifiManager.warnOut(TAG, "onConnectedDevices");
         for (int i = 0; i < connectedIPs.size(); i++) {
             String ip = connectedIPs.get(i);
-            DebugUtil.warnOut(TAG, "ip[" + i + "] = " + ip);
+            WifiManager.warnOut(TAG, "ip[" + i + "] = " + ip);
         }
     }
 
@@ -34,7 +34,7 @@ public final class DefaultOnWifiHotspotIsConnectedByOthersListener implements On
      */
     @Override
     public void onDeviceConnected(String connectedIP) {
-        DebugUtil.warnOut(TAG, "onDeviceConnected ip = " + connectedIP);
+        WifiManager.warnOut(TAG, "onDeviceConnected ip = " + connectedIP);
     }
 
     /**
@@ -44,6 +44,6 @@ public final class DefaultOnWifiHotspotIsConnectedByOthersListener implements On
      */
     @Override
     public void onDeviceDisconnected(String disconnectedIP) {
-        DebugUtil.warnOut(TAG, "onDeviceDisconnected ip = " + disconnectedIP);
+        WifiManager.warnOut(TAG, "onDeviceDisconnected ip = " + disconnectedIP);
     }
 }

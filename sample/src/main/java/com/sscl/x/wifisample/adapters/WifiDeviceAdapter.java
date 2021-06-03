@@ -4,7 +4,7 @@ package com.sscl.x.wifisample.adapters;
 import androidx.annotation.Nullable;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.chad.library.adapter.base.BaseViewHolder;
+import com.chad.library.adapter.base.viewholder.BaseViewHolder;
 import com.sscl.wifilibrary.bean.WifiDevice;
 import com.sscl.x.wifisample.R;
 
@@ -38,6 +38,6 @@ public class WifiDeviceAdapter extends BaseQuickAdapter<WifiDevice, BaseViewHold
         helper.setImageResource(R.id.signal, item.getLevelDrawableResId())
                 .setText(R.id.text1, item.getSSID())
                 .setText(R.id.text2, encryptionWay)
-                .setText(R.id.level, item.getStringLevel(mContext) + "(" + item.getIntLevel() + ")");
+                .setText(R.id.level, item.getStringLevel(getContext()) + "(" + item.getIntLevel() + ")");
     }
 }

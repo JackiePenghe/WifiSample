@@ -2,7 +2,7 @@ package com.sscl.wifilibrary.intefaces.impl;
 
 import android.net.wifi.WifiConfiguration;
 
-import com.sscl.wifilibrary.DebugUtil;
+import com.sscl.wifilibrary.WifiManager;
 import com.sscl.wifilibrary.intefaces.OnWifiHotspotStateChangedListener;
 
 
@@ -24,9 +24,9 @@ public final class DefaultOnWifiHotspotStateChangedListener implements OnWifiHot
     @Override
     public void onWifiHotspotCreating(WifiConfiguration wifiConfiguration) {
         if (wifiConfiguration != null) {
-            DebugUtil.warnOut(TAG, "热点正在创建 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
+            WifiManager.warnOut(TAG, "热点正在创建 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
         } else {
-            DebugUtil.warnOut(TAG, "热点正在创建");
+            WifiManager.warnOut(TAG, "热点正在创建");
         }
     }
 
@@ -38,9 +38,9 @@ public final class DefaultOnWifiHotspotStateChangedListener implements OnWifiHot
     @Override
     public void onWifiHotspotCreated(WifiConfiguration wifiConfiguration) {
         if (wifiConfiguration != null) {
-            DebugUtil.warnOut(TAG, "热点创建成功 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
+            WifiManager.warnOut(TAG, "热点创建成功 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
         } else {
-            DebugUtil.warnOut(TAG, "热点创建成功");
+            WifiManager.warnOut(TAG, "热点创建成功");
         }
     }
 
@@ -52,9 +52,9 @@ public final class DefaultOnWifiHotspotStateChangedListener implements OnWifiHot
     @Override
     public void onWifiHotspotCreateFailed(WifiConfiguration wifiConfiguration) {
         if (wifiConfiguration != null) {
-            DebugUtil.warnOut(TAG, "热点创建失败 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
+            WifiManager.warnOut(TAG, "热点创建失败 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
         } else {
-            DebugUtil.warnOut(TAG, "热点创建失败");
+            WifiManager.warnOut(TAG, "热点创建失败");
         }
     }
 
@@ -63,7 +63,7 @@ public final class DefaultOnWifiHotspotStateChangedListener implements OnWifiHot
      */
     @Override
     public void onWifiHotspotClosing() {
-        DebugUtil.warnOut(TAG, "热点正在关闭");
+        WifiManager.warnOut(TAG, "热点正在关闭");
     }
 
     /**
@@ -74,9 +74,9 @@ public final class DefaultOnWifiHotspotStateChangedListener implements OnWifiHot
     @Override
     public void onWifiHotspotClosed(WifiConfiguration wifiConfiguration) {
         if (wifiConfiguration != null) {
-            DebugUtil.warnOut(TAG, "热点关闭完成 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
+            WifiManager.warnOut(TAG, "热点关闭完成 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
         } else {
-            DebugUtil.warnOut(TAG, "热点关闭完成");
+            WifiManager.warnOut(TAG, "热点关闭完成");
         }
     }
 
@@ -88,9 +88,9 @@ public final class DefaultOnWifiHotspotStateChangedListener implements OnWifiHot
     @Override
     public void onWifiHotspotCloseFailed(WifiConfiguration wifiConfiguration) {
         if (wifiConfiguration != null) {
-            DebugUtil.warnOut(TAG, "热点关闭失败 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
+            WifiManager.warnOut(TAG, "热点关闭失败 SSID = " + wifiConfiguration.SSID + "password = " + wifiConfiguration.preSharedKey);
         } else {
-            DebugUtil.warnOut(TAG, "热点关闭失败");
+            WifiManager.warnOut(TAG, "热点关闭失败");
         }
     }
 }

@@ -7,7 +7,7 @@ import android.util.Log;
  *
  * @author jackie
  */
-public class DebugUtil {
+class DebugUtil {
 
     /*-----------------------------------private static variables-----------------------------------*/
 
